@@ -14,37 +14,45 @@
     }
     
     .tatami-bg {
-      background-color: #2e4430;
-      background-image: radial-gradient(#3d593f 12%, transparent 12%),
-                        radial-gradient(#3d593f 12%, transparent 12%);
-      background-size: 16px 16px;
-      background-position: 0 0, 8px 8px;
+      background-color: #1a2f1c;
+      background-image: 
+        linear-gradient(90deg, rgba(61,89,63,0.1) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(61,89,63,0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      position: relative;
+    }
+    .tatami-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+      pointer-events: none;
     }
 
     .karuta-card {
-      box-shadow: 0 4px 0 #c2b090, 0 8px 12px rgba(0,0,0,0.3);
-      transition: all 0.1s ease-out;
+      box-shadow: 0 6px 0 #b38b4d, 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .karuta-card:active:not(.taken) {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #c2b090, 0 2px 4px rgba(0,0,0,0.3);
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #b38b4d, 0 4px 6px -1px rgba(0, 0, 0, 0.5);
     }
 
     @keyframes target-pulse {
       0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.4); }
-      50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 14px 4px rgba(239, 68, 68, 0.6); }
+      50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 16px 6px rgba(239, 68, 68, 0.7); }
     }
     .cpu-targeting {
-      animation: target-pulse 1.2s infinite;
+      animation: target-pulse 1s infinite;
     }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-6px); }
-      40%, 80% { transform: translateX(6px); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
     }
     .animate-shake {
-      animation: shake 0.2s ease-in-out 3;
+      animation: shake 0.15s ease-in-out 3;
     }
 
     @keyframes confetti-fall {
@@ -56,6 +64,42 @@
       width: 12px;
       height: 12px;
       animation: confetti-fall 2.5s linear forwards;
+    }
+
+    /* 読み上げ時の波紋アニメーション */
+    @keyframes ripple {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+    .ripple-effect {
+      position: relative;
+    }
+    .ripple-effect::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      border: 4px solid #f59e0b;
+      animation: ripple 1.2s infinite ease-out;
+      pointer-events: none;
+    }
+
+    /* お手付き画面全体フラッシュ */
+    @keyframes flash-red {
+      0% { background-color: rgba(239, 68, 68, 0); }
+      20% { background-color: rgba(239, 68, 68, 0.3); }
+      100% { background-color: rgba(239, 68, 68, 0); }
+    }
+    .animate-flash-red {
+      position: relative;
+    }
+    .animate-flash-red::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      animation: flash-red 0.5s ease-out;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -177,6 +221,21 @@
               </button>
               <button class="size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-size="25">
                 25まい<br><span class="text-[10px] text-stone-500 font-normal">120びょう</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 絵のヒント -->
+          <div>
+            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
+              <i data-lucide="image" class="w-4 h-4"></i> えの ひんと
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="hint-on" class="hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md" data-hint="true">
+                <i data-lucide="eye" class="w-4 h-4"></i> あり (かんたん)
+              </button>
+              <button id="hint-off" class="hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400" data-hint="false">
+                <i data-lucide="eye-off" class="w-4 h-4"></i> なし (ふつう)
               </button>
             </div>
           </div>
@@ -335,52 +394,52 @@
   <script>
     // --- かるたのフルデータ定義 ---
     const allKaruta = [
-      { char: 'あ', phrase: 'ありさんの、あ！' },
-      { char: 'い', phrase: 'いちごの、い！' },
-      { char: 'う', phrase: 'うさぎの、う！' },
-      { char: 'え', phrase: 'えんぴつの、え！' },
-      { char: 'お', phrase: 'おにぎりの、お！' },
-      { char: 'か', phrase: 'かえるの、か！' },
-      { char: 'き', phrase: 'きりんの、き！' },
-      { char: 'く', phrase: 'くるまの、く！' },
-      { char: 'け', phrase: 'けーきの、け！' },
-      { char: 'こ', phrase: 'こまの、こ！' },
-      { char: 'さ', phrase: 'さかなの、さ！' },
-      { char: 'し', phrase: 'しんかんせんの、し！' },
-      { char: 'す', phrase: 'すいかの、す！' },
-      { char: 'せ', phrase: 'せんせいの、せ！' },
-      { char: 'そ', phrase: 'そらの、そ！' },
-      { char: 'た', phrase: 'たいこの、た！' },
-      { char: 'ち', phrase: 'ちきゅうの、ち！' },
-      { char: 'つ', phrase: 'つくえの、つ！' },
-      { char: 'て', phrase: 'てがみの、て！' },
-      { char: 'と', phrase: 'とまとの、と！' },
-      { char: 'な', phrase: 'なすの、な！' },
-      { char: 'に', phrase: 'にんじんの、に！' },
-      { char: 'ぬ', phrase: 'ぬりえの、ぬ！' },
-      { char: 'ね', phrase: 'ねこの、ね！' },
-      { char: 'の', phrase: 'のりものの、の！' },
-      { char: 'は', phrase: 'はなの、は！' },
-      { char: 'ひ', phrase: 'ひこうきの、ひ！' },
-      { char: 'ふ', phrase: 'ふうせんの、ふ！' },
-      { char: 'へ', phrase: 'へびの、へ！' },
-      { char: 'ほ', phrase: 'ほしの、ほ！' },
-      { char: 'ま', phrase: 'まいくの、ま！' },
-      { char: 'み', phrase: 'みかんの、み！' },
-      { char: 'む', phrase: 'むしの、む！' },
-      { char: 'め', phrase: 'めがねの、め！' },
-      { char: 'も', phrase: 'もものの、も！' },
-      { char: 'や', phrase: 'やまの、や！' },
-      { char: 'ゆ', phrase: 'ゆきの、ゆ！' },
-      { char: 'よ', phrase: 'よっとの、よ！' },
-      { char: 'ら', phrase: 'らいおんの、ら！' },
-      { char: 'り', phrase: 'りんごの、り！' },
-      { char: 'る', phrase: 'るすばんの、る！' },
-      { char: 'れ', phrase: 'れもんの、れ！' },
-      { char: 'ろ', phrase: 'ろけっとの、ろ！' },
-      { char: 'わ', phrase: 'わたあめの、わ！' },
-      { char: 'を', phrase: 'ほんをよむの、を！' },
-      { char: 'ん', phrase: 'ぱんの、ん！' }
+      { char: 'あ', phrase: 'ありさんの、あ！', emoji: '🐜' },
+      { char: 'い', phrase: 'いちごの、い！', emoji: '🍓' },
+      { char: 'う', phrase: 'うさぎの、う！', emoji: '🐰' },
+      { char: 'え', phrase: 'えんぴつの、え！', emoji: '✏️' },
+      { char: 'お', phrase: 'おにぎりの、お！', emoji: '🍙' },
+      { char: 'か', phrase: 'かえるの、か！', emoji: '🐸' },
+      { char: 'き', phrase: 'きりんの、き！', emoji: '🦒' },
+      { char: 'く', phrase: 'くるまの、く！', emoji: '🚗' },
+      { char: 'け', phrase: 'けーきの、け！', emoji: '🎂' },
+      { char: 'こ', phrase: 'こまの、こ！', emoji: '🌀' },
+      { char: 'さ', phrase: 'さかなの、さ！', emoji: '🐟' },
+      { char: 'し', phrase: 'しんかんせんの、し！', emoji: '🚄' },
+      { char: 'す', phrase: 'すいかの、す！', emoji: '🍉' },
+      { char: 'せ', phrase: 'せんせいの、せ！', emoji: '🏫' },
+      { char: 'そ', phrase: 'そらの、そ！', emoji: '☁️' },
+      { char: 'た', phrase: 'たいこの、た！', emoji: '🥁' },
+      { char: 'ち', phrase: 'ちきゅうの、ち！', emoji: '🌍' },
+      { char: 'つ', phrase: 'つくえの、つ！', emoji: '🪑' },
+      { char: 'て', phrase: 'てがみの、て！', emoji: '✉️' },
+      { char: 'と', phrase: 'とまとの、と！', emoji: '🍅' },
+      { char: 'な', phrase: 'なすの、な！', emoji: '🍆' },
+      { char: 'に', phrase: 'にんじんの、に！', emoji: '🥕' },
+      { char: 'ぬ', phrase: 'ぬりえの、ぬ！', emoji: '🎨' },
+      { char: 'ね', phrase: 'ねこの、ね！', emoji: '🐱' },
+      { char: 'の', phrase: 'のりものの、の！', emoji: '🚌' },
+      { char: 'は', phrase: 'はなの、は！', emoji: '🌸' },
+      { char: 'ひ', phrase: 'ひこうきの、ひ！', emoji: '✈️' },
+      { char: 'ふ', phrase: 'ふうせんの、ふ！', emoji: '🎈' },
+      { char: 'へ', phrase: 'へびの、へ！', emoji: '🐍' },
+      { char: 'ほ', phrase: 'ほしの、ほ！', emoji: '⭐' },
+      { char: 'ま', phrase: 'まいくの、ま！', emoji: '🎤' },
+      { char: 'み', phrase: 'みかんの、み！', emoji: '🍊' },
+      { char: 'む', phrase: 'むしの、む！', emoji: '🐛' },
+      { char: 'め', phrase: 'めがねの、め！', emoji: '👓' },
+      { char: 'も', phrase: 'もものの、も！', emoji: '🍑' },
+      { char: 'や', phrase: 'やまの、や！', emoji: '🗻' },
+      { char: 'ゆ', phrase: 'ゆきの、ゆ！', emoji: '❄️' },
+      { char: 'よ', phrase: 'よっとの、よ！', emoji: '⛵' },
+      { char: 'ら', phrase: 'らいおんの、ら！', emoji: '🦁' },
+      { char: 'り', phrase: 'りんごの、り！', emoji: '🍎' },
+      { char: 'る', phrase: 'るすばんの、る！', emoji: '🏠' },
+      { char: 'れ', phrase: 'れもんの、れ！', emoji: '🍋' },
+      { char: 'ろ', phrase: 'ろけっとの、ろ！', emoji: '🚀' },
+      { char: 'わ', phrase: 'わたあめの、わ！', emoji: '🍭' },
+      { char: 'を', phrase: 'ほんをよむの、を！', emoji: '📖' },
+      { char: 'ん', phrase: 'ぱんの、ん！', emoji: '🍞' }
     ];
 
     // ゲーム状態・設定
@@ -389,7 +448,8 @@
       cpuLevel: 'easy',
       size: 16, 
       speed: 0.85, 
-      soundOn: true
+      soundOn: true,
+      showEmojiHint: true
     };
 
     const state = {
@@ -564,6 +624,12 @@
         });
       });
 
+      // 絵のヒントトグルのバインド
+      const hintOnBtn = document.getElementById('hint-on');
+      const hintOffBtn = document.getElementById('hint-off');
+      hintOnBtn.addEventListener('click', () => setHint(true));
+      hintOffBtn.addEventListener('click', () => setHint(false));
+
       // 音声の切り替え
       soundToggleBtn.addEventListener('click', () => {
         config.soundOn = !config.soundOn;
@@ -595,6 +661,19 @@
         }
       });
     };
+
+    function setHint(showHint) {
+      config.showEmojiHint = showHint;
+      const hintOnBtn = document.getElementById('hint-on');
+      const hintOffBtn = document.getElementById('hint-off');
+      if (showHint) {
+        hintOnBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md";
+        hintOffBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400";
+      } else {
+        hintOnBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400";
+        hintOffBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md";
+      }
+    }
 
     function setMode(mode) {
       config.mode = mode;
@@ -641,6 +720,20 @@
         if (jaVoice) {
           utterance.voice = jaVoice;
         }
+
+        const speakerBadge = document.getElementById('reader-speaker-badge');
+        
+        utterance.onstart = function() {
+          if (speakerBadge) speakerBadge.classList.add('ripple-effect');
+        };
+        
+        utterance.onend = function() {
+          if (speakerBadge) speakerBadge.classList.remove('ripple-effect');
+        };
+        
+        utterance.onerror = function() {
+          if (speakerBadge) speakerBadge.classList.remove('ripple-effect');
+        };
 
         speechSynthesis.speak(utterance);
       }
@@ -716,15 +809,18 @@
       let gridCols = "grid-cols-3";
       let fontSizeClass = "text-5xl sm:text-6xl md:text-7xl lg:text-8xl"; 
       let cardHeightClass = "max-h-[22vh] md:max-h-[25vh]"; 
+      let emojiSizeClass = "text-3xl sm:text-4xl md:text-5xl";
       
       if (config.size === 16) {
         gridCols = "grid-cols-4";
         fontSizeClass = "text-4xl sm:text-5xl md:text-5.5xl lg:text-6.5xl"; 
         cardHeightClass = "max-h-[15vh] md:max-h-[17vh]";
+        emojiSizeClass = "text-2.5xl sm:text-3.5xl md:text-4.5xl";
       } else if (config.size === 25) {
         gridCols = "grid-cols-5";
         fontSizeClass = "text-3xl sm:text-4xl md:text-5xl lg:text-6xl"; 
         cardHeightClass = "max-h-[11vh] md:max-h-[12.5vh]";
+        emojiSizeClass = "text-2xl sm:text-3xl md:text-4xl";
       }
       
       karutaBoard.className = `grid ${gridCols} gap-2.5 sm:gap-3.5 md:gap-4 w-full h-full max-h-[85vh] md:max-h-[92vh] max-w-4xl`;
@@ -733,12 +829,20 @@
         const cardBtn = document.createElement('button');
         cardBtn.id = `card-${card.char}`;
         
-        cardBtn.className = `karuta-card bg-amber-50 hover:bg-amber-100 rounded-2xl text-stone-900 flex items-center justify-center p-2 border-3 md:border-4 border-amber-200/80 aspect-square relative overflow-hidden transition-all ${cardHeightClass}`;
+        // カードの比率をかるた札らしく aspect-[3/4] に設定し、和紙グラデーションと金枠風ボーダーを適用
+        cardBtn.className = `karuta-card bg-gradient-to-br from-amber-50 to-orange-50/40 hover:from-amber-100/90 hover:to-orange-100/60 rounded-2xl text-stone-900 flex flex-col items-center justify-between p-3 border-3 md:border-4 border-amber-700/35 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
         
+        let emojiHtml = '';
+        if (config.showEmojiHint) {
+          emojiHtml = `<span class="${emojiSizeClass} leading-none mb-1 opacity-90 select-none filter drop-shadow">${card.emoji}</span>`;
+        }
+
         cardBtn.innerHTML = `
-          <div class="${fontSizeClass} font-black text-stone-850 font-ud-gothic select-none leading-none">
-            ${card.char}
+          <div class="absolute inset-1.5 border border-amber-700/10 rounded-xl pointer-events-none"></div>
+          <div class="flex-grow flex items-center justify-center">
+            <span class="${fontSizeClass} font-black text-stone-850 font-ud-gothic select-none leading-none">${card.char}</span>
           </div>
+          ${emojiHtml}
         `;
 
         cardBtn.addEventListener('click', () => handleCardTap(card));
@@ -817,6 +921,13 @@
       state.isInputLocked = true;
 
       cardEl.classList.add('border-rose-650', 'bg-rose-100', 'animate-shake');
+      
+      // お手付き時に画面全体を赤くフラッシュ
+      const gameScreen = document.getElementById('screen-game');
+      if (gameScreen) {
+        gameScreen.classList.add('animate-flash-red');
+        setTimeout(() => gameScreen.classList.remove('animate-flash-red'), 500);
+      }
       
       const gameTip = document.getElementById('game-tip');
       gameTip.className = "text-rose-400 font-bold animate-pulse text-sm text-center";
