@@ -18,12 +18,12 @@
       font-family: "Klee One", "UD Digi Kyokasho N-R", "BIZ UDGothic", sans-serif;
     }
     
-    /* 目に優しく温かみのあるクラフト風ドット背景 */
+    /* 暗めのネイビーを基調としたポップ背景 */
     .pop-bg {
-      background-color: #fdfbf7;
+      background-color: #1e293b;
       background-image: 
-        radial-gradient(#f1ebe1 20%, transparent 20%), 
-        radial-gradient(#f1ebe1 20%, transparent 20%);
+        radial-gradient(#334155 20%, transparent 20%), 
+        radial-gradient(#334155 20%, transparent 20%);
       background-size: 36px 36px;
       background-position: 0 0, 18px 18px;
       position: relative;
@@ -32,7 +32,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, transparent 40%, rgba(253,251,247,0.8) 100%);
+      background: radial-gradient(circle at center, transparent 40%, rgba(15,23,42,0.8) 100%);
       pointer-events: none;
     }
 
@@ -179,7 +179,7 @@
     }
   </style>
 </head>
-<body class="bg-stone-50 text-slate-800 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
+<body class="bg-slate-900 text-slate-800 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
 
   <!-- ヘッダー -->
   <header id="main-header" class="bg-orange-400 border-b-4 border-orange-500 py-2 md:py-3 px-4 shadow-md sticky top-0 z-40 flex-shrink-0 transition-all duration-300">
@@ -892,10 +892,21 @@
     function speakText(card) {
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(card.phrase);
+
+        // 読み上げ用テキストの調整（助詞の誤読防止とアクセント改善）
+        let speakStr = card.phrase;
+        
+        // 「は」「へ」が助詞「わ」「え」と読まれるのを防ぐため、カタカナに変換して読ませる
+        speakStr = speakStr.replace(/、は！$/, '、ハ！');
+        speakStr = speakStr.replace(/、へ！$/, '、ヘ！');
+        
+        // アクセントをより自然な区切りにするため、読点をピリオドに変換（エンジンによって自然に間が空きやすくなる）
+        speakStr = speakStr.replace('の、', 'の。');
+
+        const utterance = new SpeechSynthesisUtterance(speakStr);
         utterance.lang = 'ja-JP';
         utterance.rate = config.speed;
-        utterance.pitch = 1.15;
+        utterance.pitch = 1.0; // ピッチを標準(1.0)に戻し、自然な日本語のアクセントにする
         utterance.muted = !config.soundOn;
 
         const voices = speechSynthesis.getVoices();
