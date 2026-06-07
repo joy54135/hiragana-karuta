@@ -18,34 +18,37 @@
       font-family: "Klee One", "UD Digi Kyokasho N-R", "BIZ UDGothic", sans-serif;
     }
     
-    .tatami-bg {
-      background-color: #1a2f1c;
+    /* ポップで明るいミントグリーンの水玉背景 */
+    .pop-bg {
+      background-color: #f0fdfa;
       background-image: 
-        linear-gradient(90deg, rgba(61,89,63,0.1) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(61,89,63,0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
+        radial-gradient(#ccfbf1 20%, transparent 20%), 
+        radial-gradient(#ccfbf1 20%, transparent 20%);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
       position: relative;
     }
-    .tatami-bg::before {
+    .pop-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+      background: radial-gradient(circle at center, transparent 30%, rgba(240,253,250,0.8) 100%);
       pointer-events: none;
     }
 
     .karuta-card {
-      box-shadow: 0 6px 0 #b38b4d, 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      background: #ffffff;
+      box-shadow: 0 6px 0 #cbd5e1, 0 8px 15px -3px rgba(0, 0, 0, 0.1);
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .karuta-card:active:not(.taken) {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 #b38b4d, 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 0 #cbd5e1, 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     @keyframes target-pulse {
-      0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0px rgba(239, 68, 68, 0.4); }
-      50% { border-color: rgba(239, 68, 68, 1); box-shadow: 0 0 16px 6px rgba(239, 68, 68, 0.7); }
+      0%, 100% { border-color: rgba(244, 63, 94, 0.4); box-shadow: 0 0 0 0px rgba(244, 63, 94, 0.4); }
+      50% { border-color: rgba(244, 63, 94, 1); box-shadow: 0 0 16px 6px rgba(244, 63, 94, 0.5); }
     }
     .cpu-targeting {
       animation: target-pulse 1s infinite;
@@ -83,15 +86,15 @@
       position: absolute;
       inset: -4px;
       border-radius: inherit;
-      border: 4px solid #f59e0b;
+      border: 4px solid #fb923c;
       animation: ripple 1.2s infinite ease-out;
       pointer-events: none;
     }
 
     @keyframes flash-red {
-      0% { background-color: rgba(239, 68, 68, 0); }
-      20% { background-color: rgba(239, 68, 68, 0.3); }
-      100% { background-color: rgba(239, 68, 68, 0); }
+      0% { background-color: rgba(244, 63, 94, 0); }
+      20% { background-color: rgba(244, 63, 94, 0.2); }
+      100% { background-color: rgba(244, 63, 94, 0); }
     }
     .animate-flash-red {
       position: relative;
@@ -138,12 +141,12 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      background: rgba(251,191,36,0.15);
-      border: 1px solid rgba(251,191,36,0.4);
+      background: #ffedd5;
+      border: 1px solid #fdba74;
       border-radius: 9999px;
       padding: 2px 10px;
       font-size: 0.75rem;
-      color: #fde68a;
+      color: #ea580c;
       font-weight: bold;
       margin: 2px;
     }
@@ -159,41 +162,43 @@
       cursor: pointer;
     }
     .opt-btn.active {
-      background: rgba(120,53,15,0.5);
-      border-color: #d97706;
-      color: #fde68a;
+      background: #fff7ed;
+      border-color: #f97316;
+      color: #c2410c;
+      box-shadow: 0 2px 4px rgba(249, 115, 22, 0.15);
     }
     .opt-btn.inactive {
-      background: #0c0a09;
-      border-color: #292524;
-      color: #57534e;
+      background: #ffffff;
+      border-color: #e2e8f0;
+      color: #64748b;
     }
     .opt-btn.inactive:hover {
-      border-color: #78350f;
-      color: #d6d3d1;
+      border-color: #cbd5e1;
+      color: #475569;
+      background: #f8fafc;
     }
   </style>
 </head>
-<body class="bg-stone-900 text-stone-100 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
+<body class="bg-sky-50 text-slate-800 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
 
   <!-- ヘッダー -->
-  <header id="main-header" class="bg-amber-950 border-b-4 border-amber-800 py-2 md:py-3 px-4 shadow-md sticky top-0 z-40 flex-shrink-0 transition-all duration-300">
+  <header id="main-header" class="bg-orange-400 border-b-4 border-orange-500 py-2 md:py-3 px-4 shadow-md sticky top-0 z-40 flex-shrink-0 transition-all duration-300">
     <div class="max-w-5xl mx-auto flex justify-between items-center">
       <div class="flex items-center space-x-3">
-        <div class="bg-amber-100 text-amber-950 px-2 py-1 rounded-lg border-2 border-amber-600 font-bold shadow transform -rotate-3 text-sm">
+        <div class="bg-white text-orange-500 px-2 py-1 rounded-lg border-2 border-orange-200 font-black shadow-sm transform -rotate-3 text-sm">
           あ
         </div>
         <div>
-          <h1 class="text-base md:text-xl font-bold text-amber-100 tracking-wider font-ud-gothic">ひらがな・カタカナ かるた</h1>
+          <h1 class="text-base md:text-xl font-bold text-white tracking-wider font-ud-gothic">ひらがな・カタカナ かるた</h1>
         </div>
       </div>
       
       <!-- 設定・音量 -->
       <div class="flex items-center space-x-3">
-        <button id="sound-toggle-btn" class="p-2 bg-amber-900 hover:bg-amber-800 rounded-lg text-amber-200 border border-amber-700 transition-colors" title="おとの おおきさ">
+        <button id="sound-toggle-btn" class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white border border-white/30 transition-colors" title="おとの おおきさ">
           <i id="sound-icon" data-lucide="volume-2" class="w-5 h-5"></i>
         </button>
-        <button id="help-btn" class="p-2 bg-amber-900 hover:bg-amber-800 rounded-lg text-amber-200 border border-amber-700 transition-colors" title="あそびかた">
+        <button id="help-btn" class="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white border border-white/30 transition-colors" title="あそびかた">
           <i data-lucide="help-circle" class="w-5 h-5"></i>
         </button>
       </div>
@@ -210,17 +215,17 @@
   <main class="flex-grow flex flex-col relative overflow-hidden h-full">
 
     <!-- ===== 設定画面（2ステップ） ===== -->
-    <section id="screen-start" class="flex-grow flex items-center justify-center p-2 md:p-4 tatami-bg overflow-y-auto">
-      <div class="bg-stone-900/95 border-4 border-amber-600 max-w-md w-full p-4 md:p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden">
+    <section id="screen-start" class="flex-grow flex items-center justify-center p-2 md:p-4 pop-bg overflow-y-auto">
+      <div class="bg-white/95 border-4 border-orange-400 max-w-md w-full p-4 md:p-6 rounded-3xl shadow-xl text-center relative overflow-hidden">
         
         <div class="flex justify-center mb-2">
-          <div class="w-14 h-14 rounded-full border-4 border-amber-500/30 flex items-center justify-center bg-gradient-to-br from-amber-500 to-yellow-600 shadow-md">
-            <span id="header-char-display" class="text-stone-900 font-bold text-2xl font-klee">あ</span>
+          <div class="w-14 h-14 rounded-full border-4 border-orange-200 flex items-center justify-center bg-gradient-to-br from-orange-300 to-orange-500 shadow-sm">
+            <span id="header-char-display" class="text-white font-bold text-2xl font-klee">あ</span>
           </div>
         </div>
 
-        <h2 class="text-xl md:text-2xl font-bold text-amber-400 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
-        <p class="text-xs text-stone-400 mb-3 font-bold">Ver 2.0</p>
+        <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
+        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 2.1</p>
 
         <!-- サマリーバッジ -->
         <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
@@ -228,9 +233,9 @@
         <!-- ====== Step 1: プレイスタイル ====== -->
         <div id="wizard-step-1" class="wizard-step text-left">
           
-          <div class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-4">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="users" class="w-4 h-4"></i> だれと あそぶ？
+          <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-4">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4 text-orange-500"></i> だれと あそぶ？
             </p>
             <div class="grid grid-cols-2 gap-2">
               <button id="btn-solo" class="opt-btn active flex flex-col items-center gap-1" onclick="selectMode('solo')">
@@ -242,9 +247,9 @@
             </div>
           </div>
 
-          <div id="cpu-level-section" class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-4 transition-all duration-300 opacity-40 pointer-events-none">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="bot" class="w-4 h-4"></i> あいての つよさ
+          <div id="cpu-level-section" class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-4 transition-all duration-300 opacity-40 pointer-events-none">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="bot" class="w-4 h-4 text-orange-500"></i> あいての つよさ
             </p>
             <div class="grid grid-cols-3 gap-2">
               <button id="btn-cpu-easy"   class="opt-btn active text-xs flex flex-col items-center gap-1" onclick="selectCpu('easy')"><span class="text-xl">🐰</span>ゆっくり</button>
@@ -253,9 +258,9 @@
             </div>
           </div>
 
-          <div class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-4">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="mic" class="w-4 h-4"></i> こえの はやさ
+          <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-4">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="mic" class="w-4 h-4 text-orange-500"></i> こえの はやさ
             </p>
             <div class="grid grid-cols-3 gap-2">
               <button id="btn-spd-slow"   class="opt-btn active text-sm" onclick="selectSpeed(0.85)">ゆっくり</button>
@@ -264,7 +269,7 @@
             </div>
           </div>
 
-          <button class="w-full bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-3 rounded-xl text-base tracking-wide transition-colors shadow-lg" onclick="goToStep(2)">
+          <button class="w-full bg-orange-500 hover:bg-orange-400 text-white font-bold py-3 rounded-xl text-base tracking-wide transition-colors shadow-md" onclick="goToStep(2)">
             つぎへすすむ →
           </button>
         </div>
@@ -272,40 +277,40 @@
         <!-- ====== Step 2: ルール ====== -->
         <div id="wizard-step-2" class="wizard-step text-left hidden">
           
-          <div class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-3">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="type" class="w-4 h-4"></i> もじの しゅるい
+          <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-3">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="type" class="w-4 h-4 text-orange-500"></i> もじの しゅるい
             </p>
             <div class="grid grid-cols-2 gap-2">
               <button id="btn-script-hira" class="opt-btn active flex flex-col items-center gap-1" onclick="selectScript('hiragana')">
-                <span class="text-2xl font-klee">あ</span>ひらがな
+                <span class="text-2xl font-klee text-slate-800">あ</span>ひらがな
               </button>
               <button id="btn-script-kata" class="opt-btn inactive flex flex-col items-center gap-1" onclick="selectScript('katakana')">
-                <span class="text-2xl font-klee">ア</span>カタカナ
+                <span class="text-2xl font-klee text-slate-800">ア</span>カタカナ
               </button>
             </div>
           </div>
 
-          <div class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-3">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="music" class="w-4 h-4"></i> おとの しゅるい
+          <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-3">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="music" class="w-4 h-4 text-orange-500"></i> おとの しゅるい
             </p>
             <div class="grid grid-cols-3 gap-2">
               <button id="btn-sound-sei" class="opt-btn active flex flex-col items-center gap-1 text-xs" onclick="selectSound('seion')">
-                <span class="text-xl font-klee" id="samp-sei">あ〜ん</span>せいおん
+                <span class="text-xl font-klee text-slate-800" id="samp-sei">あ〜ん</span>せいおん
               </button>
               <button id="btn-sound-daku" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectSound('dakuon')">
-                <span class="text-xl font-klee" id="samp-daku">が〜ぽ</span>だくおん
+                <span class="text-xl font-klee text-slate-800" id="samp-daku">が〜ぽ</span>だくおん
               </button>
               <button id="btn-sound-you" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectSound('youon')">
-                <span class="text-xl font-klee" id="samp-you">きゃ〜</span>ようおん
+                <span class="text-xl font-klee text-slate-800" id="samp-you">きゃ〜</span>ようおん
               </button>
             </div>
           </div>
 
-          <div class="bg-stone-950/50 p-3 rounded-xl border border-stone-800 mb-4">
-            <p class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-              <i data-lucide="layers" class="w-4 h-4"></i> カードの かず <span class="text-stone-400 font-normal text-xs ml-auto">※ぜんぶ 120びょう</span>
+          <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 mb-4">
+            <p class="text-sm font-bold text-orange-600 mb-2 flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-orange-500"></i> カードの かず <span class="text-slate-400 font-normal text-[10px] ml-auto">※ぜんぶ 120びょう</span>
             </p>
             <div class="grid grid-cols-3 gap-2">
               <button id="btn-size-9"  class="opt-btn inactive text-sm" onclick="selectSize(9)">9まい</button>
@@ -315,10 +320,10 @@
           </div>
 
           <div class="flex gap-2">
-            <button class="w-1/3 bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-3 rounded-xl text-sm transition-colors" onclick="goToStep(1)">
+            <button class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-sm transition-colors" onclick="goToStep(1)">
               ← もどる
             </button>
-            <button class="w-2/3 bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-stone-950 font-black text-lg py-3 rounded-xl shadow-xl hover:shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0 tracking-wider font-ud-gothic" onclick="handleStartClick()">
+            <button class="w-2/3 bg-gradient-to-r from-orange-400 via-orange-500 to-amber-400 text-white font-black text-lg py-3 rounded-xl shadow-lg hover:shadow-orange-300/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 tracking-wider font-ud-gothic" onclick="handleStartClick()">
               はじめる！🎮
             </button>
           </div>
@@ -328,23 +333,23 @@
     </section>
 
     <!-- ===== ゲーム本番画面 ===== -->
-    <section id="screen-game" class="flex-grow h-full flex flex-col hidden tatami-bg overflow-hidden">
+    <section id="screen-game" class="flex-grow h-full flex flex-col hidden pop-bg overflow-hidden">
       
       <!-- 上部: 相手エリア -->
-      <div id="cpu-status-area" class="bg-stone-900/90 border-b-2 border-amber-900/40 px-4 py-2 flex justify-between items-center shadow-md z-10 hidden">
+      <div id="cpu-status-area" class="bg-white/90 border-b-2 border-orange-200 px-4 py-2 flex justify-between items-center shadow-sm z-10 hidden">
         <div class="flex items-center gap-3">
-          <div id="cpu-avatar-container" class="w-12 h-12 bg-stone-800 rounded-full flex items-center justify-center text-3xl border-2 border-rose-500 shadow-sm transition-transform">
+          <div id="cpu-avatar-container" class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-3xl border-2 border-rose-300 shadow-sm transition-transform">
             <span id="cpu-avatar">🐰</span>
           </div>
           <div class="flex flex-col">
-            <span class="text-xs text-stone-400 font-bold font-ud-gothic">あいて</span>
-            <span class="text-xl font-bold text-rose-400 font-ud-gothic leading-none"><span id="cpu-score">0</span> まい</span>
+            <span class="text-xs text-slate-500 font-bold font-ud-gothic">あいて</span>
+            <span class="text-xl font-bold text-rose-500 font-ud-gothic leading-none"><span id="cpu-score">0</span> まい</span>
           </div>
         </div>
         <div class="flex items-center gap-4">
           <div class="text-right">
-            <span class="text-xs text-stone-400 font-bold block font-ud-gothic">のこり</span>
-            <span id="remaining-count" class="font-bold text-white text-lg font-ud-gothic">16まい</span>
+            <span class="text-xs text-slate-500 font-bold block font-ud-gothic">のこり</span>
+            <span id="remaining-count" class="font-bold text-slate-700 text-lg font-ud-gothic">16まい</span>
           </div>
         </div>
       </div>
@@ -357,90 +362,90 @@
       </div>
 
       <!-- 下部: 自分エリア ＆ 読み札表示 -->
-      <div class="bg-stone-900/95 border-t-2 border-amber-900/40 p-3 md:p-4 z-10 shadow-lg">
+      <div class="bg-white/95 border-t-2 border-orange-200 p-3 md:p-4 z-10 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
           
           <!-- 左: 自分のスコア＆タイマー -->
           <div class="flex md:flex-col gap-4 md:gap-2 w-full md:w-auto justify-center">
-            <div class="flex items-center justify-between gap-3 bg-stone-950/60 px-4 py-2 rounded-xl border border-white/5">
-              <span class="text-sm text-stone-400 font-bold font-ud-gothic">じぶん</span>
-              <span class="text-lg font-bold text-amber-300 font-ud-gothic"><span id="player-score" class="text-2xl">0</span> まい</span>
+            <div class="flex items-center justify-between gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+              <span class="text-sm text-slate-500 font-bold font-ud-gothic">じぶん</span>
+              <span class="text-lg font-bold text-orange-500 font-ud-gothic"><span id="player-score" class="text-2xl">0</span> まい</span>
             </div>
-            <div class="flex items-center justify-between gap-3 bg-stone-950/60 px-4 py-2 rounded-xl border border-white/5">
-              <span class="text-sm text-stone-400 font-bold font-ud-gothic">じかん</span>
-              <span id="timer-val" class="font-bold text-emerald-400 transition-colors text-xl font-ud-gothic">120.0</span>
+            <div class="flex items-center justify-between gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+              <span class="text-sm text-slate-500 font-bold font-ud-gothic">じかん</span>
+              <span id="timer-val" class="font-bold text-emerald-500 transition-colors text-xl font-ud-gothic">120.0</span>
             </div>
           </div>
 
           <!-- 中央: 読み札表示エリア -->
-          <div class="bg-amber-50 text-stone-900 border-4 border-amber-800 rounded-2xl py-3 px-6 shadow-xl relative overflow-hidden flex-grow w-full md:w-auto flex flex-col justify-center">
-            <div class="absolute inset-0.5 border-2 border-amber-800/10 rounded-xl pointer-events-none"></div>
+          <div class="bg-white border-4 border-orange-300 rounded-2xl py-3 px-6 shadow-sm relative overflow-hidden flex-grow w-full md:w-auto flex flex-col justify-center">
+            <div class="absolute inset-0.5 border-2 border-orange-100 rounded-xl pointer-events-none"></div>
             <div class="flex items-center justify-center space-x-2 z-10 mb-1">
-              <div class="bg-amber-800 text-amber-100 p-1.5 rounded-lg shadow animate-pulse flex-shrink-0" id="reader-speaker-badge">
+              <div class="bg-orange-400 text-white p-1.5 rounded-lg shadow-sm animate-pulse flex-shrink-0" id="reader-speaker-badge">
                 <i data-lucide="volume-2" class="w-4 h-4"></i>
               </div>
-              <span class="text-xs text-amber-800 font-black tracking-wider bg-amber-200/50 px-2 py-0.5 rounded font-ud-gothic">よみあげ</span>
+              <span class="text-xs text-orange-600 font-black tracking-wider bg-orange-100 px-2 py-0.5 rounded font-ud-gothic">よみあげ</span>
             </div>
             
-            <h3 id="current-read-phrase" class="text-2xl md:text-3xl lg:text-4xl font-black tracking-wider text-stone-800 font-klee min-h-[3rem] flex items-center justify-center text-center leading-tight py-2">
+            <h3 id="current-read-phrase" class="text-2xl md:text-3xl lg:text-4xl font-black tracking-wider text-slate-800 font-klee min-h-[3rem] flex items-center justify-center text-center leading-tight py-2">
               （まってね）
             </h3>
           </div>
 
           <!-- 右: コントロールボタン -->
           <div class="flex md:flex-col gap-3 w-full md:w-auto justify-center">
-            <button id="replay-btn" class="flex-1 md:flex-none bg-amber-800 hover:bg-amber-900 text-white py-3 md:py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm font-bold font-ud-gothic">
+            <button id="replay-btn" class="flex-1 md:flex-none bg-sky-400 hover:bg-sky-500 text-white py-3 md:py-2.5 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-sm font-bold font-ud-gothic">
               <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
               <span>もういっかい</span>
             </button>
-            <button id="abandon-btn" class="flex-1 md:flex-none bg-stone-800 hover:bg-stone-700 text-stone-200 py-3 md:py-2.5 px-4 rounded-xl transition-colors border border-stone-700 font-bold font-ud-gothic text-sm">
+            <button id="abandon-btn" class="flex-1 md:flex-none bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 md:py-2.5 px-4 rounded-xl transition-colors border border-slate-300 font-bold font-ud-gothic text-sm">
               やめる
             </button>
           </div>
 
         </div>
-        <p id="game-tip" class="text-xs text-stone-300 leading-tight font-bold mt-2 text-center">💡 こえを よく きいて、ただしいもじを タッチしよう！</p>
+        <p id="game-tip" class="text-xs text-slate-500 leading-tight font-bold mt-2 text-center">💡 こえを よく きいて、ただしいもじを タッチしよう！</p>
       </div>
 
     </section>
 
     <!-- ===== 結果画面 ===== -->
-    <section id="screen-result" class="flex-grow flex items-center justify-center p-3 md:p-6 tatami-bg hidden overflow-y-auto">
-      <div class="bg-stone-900/95 border-4 border-amber-600 max-w-md w-full p-6 md:p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden">
+    <section id="screen-result" class="flex-grow flex items-center justify-center p-3 md:p-6 pop-bg hidden overflow-y-auto">
+      <div class="bg-white/95 border-4 border-orange-400 max-w-md w-full p-6 md:p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden">
         
         <div class="flex justify-center mb-3">
-          <div id="result-status-badge" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-md border-4 border-amber-500 bg-amber-100">
+          <div id="result-status-badge" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl shadow-sm border-4 border-orange-300 bg-orange-100">
             👑
           </div>
         </div>
 
-        <h2 id="result-title" class="text-2xl md:text-3xl font-black text-amber-400 tracking-wider mb-2 font-ud-gothic">おしまい！</h2>
-        <p id="result-subtitle" class="text-base text-stone-200 font-bold mb-5 font-ud-gothic">ぜんぶ とれたね！</p>
+        <h2 id="result-title" class="text-2xl md:text-3xl font-black text-orange-500 tracking-wider mb-2 font-ud-gothic">おしまい！</h2>
+        <p id="result-subtitle" class="text-base text-slate-600 font-bold mb-5 font-ud-gothic">ぜんぶ とれたね！</p>
 
-        <div class="bg-stone-950/80 border border-white/10 rounded-2xl p-4 mb-6 text-left space-y-3 text-sm md:text-base font-bold">
-          <div class="flex justify-between items-center pb-2 border-b border-white/5">
-            <span class="text-stone-300 flex items-center gap-2 font-ud-gothic"><i data-lucide="user" class="w-5 h-5 text-amber-500"></i> じぶんが とった かず</span>
-            <span class="font-black text-amber-300 font-ud-gothic"><span id="res-player-score" class="text-xl">0</span> まい</span>
+        <div class="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6 text-left space-y-3 text-sm md:text-base font-bold text-slate-600">
+          <div class="flex justify-between items-center pb-2 border-b border-orange-200/50">
+            <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="user" class="w-5 h-5 text-orange-500"></i> じぶんが とった かず</span>
+            <span class="font-black text-orange-500 font-ud-gothic"><span id="res-player-score" class="text-xl">0</span> まい</span>
           </div>
-          <div id="res-cpu-row" class="flex justify-between items-center pb-2 border-b border-white/5">
-            <span class="text-stone-300 flex items-center gap-2 font-ud-gothic"><i data-lucide="bot" class="w-5 h-5 text-rose-500"></i> あいてが とった かず</span>
-            <span class="font-black text-rose-400 font-ud-gothic"><span id="res-cpu-score" class="text-xl">0</span> まい</span>
+          <div id="res-cpu-row" class="flex justify-between items-center pb-2 border-b border-orange-200/50">
+            <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="bot" class="w-5 h-5 text-rose-500"></i> あいてが とった かず</span>
+            <span class="font-black text-rose-500 font-ud-gothic"><span id="res-cpu-score" class="text-xl">0</span> まい</span>
           </div>
-          <div class="flex justify-between items-center pb-2 border-b border-white/5">
-            <span class="text-stone-300 flex items-center gap-2 font-ud-gothic"><i data-lucide="clock" class="w-5 h-5 text-sky-500"></i> のこった じかん</span>
-            <span class="font-black text-sky-400 font-ud-gothic"><span id="res-time">0.0</span> びょう</span>
+          <div class="flex justify-between items-center pb-2 border-b border-orange-200/50">
+            <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="clock" class="w-5 h-5 text-emerald-500"></i> のこった じかん</span>
+            <span class="font-black text-emerald-500 font-ud-gothic"><span id="res-time">0.0</span> びょう</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-stone-300 flex items-center gap-2 font-ud-gothic"><i data-lucide="alert-circle" class="w-5 h-5 text-orange-400"></i> まちがえた かず</span>
-            <span class="font-black text-orange-400 font-ud-gothic"><span id="res-miss">0</span> かい</span>
+            <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="alert-circle" class="w-5 h-5 text-amber-500"></i> まちがえた かず</span>
+            <span class="font-black text-amber-500 font-ud-gothic"><span id="res-miss">0</span> かい</span>
           </div>
         </div>
 
         <div class="space-y-3">
-          <button id="rematch-btn" class="w-full bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-stone-950 font-black py-3.5 px-4 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-base md:text-lg font-ud-gothic">
+          <button id="rematch-btn" class="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-base md:text-lg font-ud-gothic">
             もういっかい あそぶ
           </button>
-          <button id="to-start-btn" class="w-full bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold py-3 px-4 rounded-xl border border-stone-700 transition-all text-sm md:text-base font-ud-gothic">
+          <button id="to-start-btn" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl border border-slate-300 transition-all text-sm md:text-base font-ud-gothic">
             もどる
           </button>
         </div>
@@ -450,26 +455,26 @@
   </main>
 
   <!-- あそびかた説明モーダル -->
-  <div id="help-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-stone-900 border-4 border-amber-600 max-w-sm w-full p-6 rounded-3xl shadow-2xl relative">
-      <button id="close-help-btn" class="absolute top-4 right-4 text-stone-400 hover:text-white">
+  <div id="help-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-4 border-orange-400 max-w-sm w-full p-6 rounded-3xl shadow-2xl relative">
+      <button id="close-help-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
         <i data-lucide="x" class="w-6 h-6"></i>
       </button>
 
-      <h3 class="text-lg font-black text-amber-400 mb-4 tracking-wider flex items-center gap-2 font-ud-gothic">
+      <h3 class="text-lg font-black text-orange-500 mb-4 tracking-wider flex items-center gap-2 font-ud-gothic">
         <i data-lucide="book-open" class="w-5 h-5"></i> あそびかた
       </h3>
       
-      <div class="space-y-4 text-stone-200 leading-relaxed font-ud-gothic text-sm md:text-base font-bold">
-        <div class="bg-stone-950 p-4 rounded-xl border border-white/5">
-          <span class="text-amber-200 block mb-1">🎮 ルール</span>
+      <div class="space-y-4 text-slate-700 leading-relaxed font-ud-gothic text-sm md:text-base font-bold">
+        <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+          <span class="text-sky-600 block mb-1">🎮 ルール</span>
           1. こえが きこえるよ。<br>
           2. がめんの なかから、ただしいもじを タッチしてね。<br>
           3. じかん（120びょう）が なくなる まえに、ぜんぶの カードを とろう！
         </div>
 
-        <div class="bg-stone-950 p-4 rounded-xl border border-white/5">
-          <span class="text-rose-400 block mb-1">⚠️ まちがい（おてつき）</span>
+        <div class="bg-rose-50 p-4 rounded-xl border border-rose-100">
+          <span class="text-rose-500 block mb-1">⚠️ まちがい（おてつき）</span>
           ちがうもじを えらぶと、すこし うごけなく なるよ。よく みて えらぼうね！
         </div>
       </div>
@@ -478,7 +483,7 @@
 
   <script>
     // ============================================================
-    //   Ver 2.0 - ひらがな・カタカナ かるた (2-Step / 120s Fixed)
+    //   Ver 2.1 - ひらがな・カタカナ かるた (ポップデザイン版)
     // ============================================================
 
     // --- ひらがな データ ---
@@ -500,7 +505,7 @@
       { char: 'へ', phrase: 'へびの、へ！' }, { char: 'ほ', phrase: 'ほしの、ほ！' },
       { char: 'ま', phrase: 'まりの、ま！' }, { char: 'み', phrase: 'みかんの、み！' },
       { char: 'む', phrase: 'むしの、む！' }, { char: 'め', phrase: 'めだかの、め！' },
-      { char: 'も', phrase: 'ももの、も！' }, { char: 'や', phrase: 'やぎの、や！' },
+      { char: 'も', phrase: 'もものの、も！' }, { char: 'や', phrase: 'やぎの、や！' },
       { char: 'ゆ', phrase: 'ゆきの、ゆ！' }, { char: 'よ', phrase: 'よるの、よ！' },
       { char: 'ら', phrase: 'らっこの、ら！' }, { char: 'り', phrase: 'りすの、り！' },
       { char: 'る', phrase: 'るすばんの、る！' }, { char: 'れ', phrase: 'れんこんの、れ！' },
@@ -612,7 +617,7 @@
       mode: 'solo',
       script: 'hiragana',   // 'hiragana' | 'katakana'
       soundType: 'seion',   // 'seion' | 'dakuon' | 'youon'
-      cpuLevel: 'easy',     // 'easy' | 'medium' | 'hard' (げきむず削除)
+      cpuLevel: 'easy',     // 'easy' | 'medium' | 'hard' 
       size: 16,
       speed: 0.85,
       soundOn: true,
@@ -635,7 +640,6 @@
 
     const mainHeader = document.getElementById('main-header');
 
-    // 現在の設定に応じたカルタデータを返す
     function getCurrentKarutaData() {
       if (config.script === 'katakana') {
         if (config.soundType === 'seion') return seionKata;
@@ -649,7 +653,6 @@
     }
 
     // ===== ウィザードロジック (2 Steps) =====
-
     function goToStep(n) {
       document.getElementById('wizard-step-1').classList.add('hidden');
       document.getElementById('wizard-step-2').classList.add('hidden');
@@ -666,7 +669,6 @@
       document.getElementById('btn-solo').className = mode === 'solo' ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
       document.getElementById('btn-vs').className  = mode === 'vs'   ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
       
-      // 連動UI: ひとり時はCPUレベルをグレーアウト
       const cpuSec = document.getElementById('cpu-level-section');
       if (mode === 'solo') {
         cpuSec.classList.add('opacity-40', 'pointer-events-none');
@@ -741,7 +743,6 @@
         summaryEl.innerHTML = '';
         return;
       }
-      // Step 2 のときのみサマリー表示
       const tags = [];
       tags.push(config.mode === 'solo' ? '🙋 ひとり' : '🤝 あいてと');
       if (config.mode === 'vs') {
@@ -834,7 +835,6 @@
       }
     };
 
-    // DOM要素
     const startScreen  = document.getElementById('screen-start');
     const gameScreen   = document.getElementById('screen-game');
     const resultScreen = document.getElementById('screen-result');
@@ -845,7 +845,6 @@
     const closeHelpBtn   = document.getElementById('close-help-btn');
     const timerValEl     = document.getElementById('timer-val');
 
-    // ===== 初期化 =====
     window.onload = function() {
       lucide.createIcons();
       updateSummary();
@@ -890,14 +889,13 @@
       initGame();
     }
 
-    // ===== 読み上げ (Web Speech API) =====
     function speakText(card) {
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(card.phrase);
         utterance.lang = 'ja-JP';
         utterance.rate = config.speed;
-        utterance.pitch = 1.15; // 音声変更なしの指示に基づく
+        utterance.pitch = 1.15;
         utterance.muted = !config.soundOn;
 
         const voices = speechSynthesis.getVoices();
@@ -912,8 +910,6 @@
       }
     }
 
-    // ===== ゲームコアシステム =====
-
     function initGame() {
       if (mainHeader) mainHeader.classList.add('hidden');
       startScreen.classList.add('hidden');
@@ -925,13 +921,10 @@
       state.missCount = 0;
       state.isPlaying = true;
       state.isInputLocked = false;
-      
-      // 制限時間を120秒で一律固定
       state.timeLeft = 120;
 
       document.getElementById('player-score').textContent = '0';
       document.getElementById('cpu-score').textContent = '0';
-      
       updateTimerDisplay();
 
       const cpuStatusArea = document.getElementById('cpu-status-area');
@@ -970,14 +963,12 @@
     
     function updateTimerDisplay() {
       timerValEl.textContent = state.timeLeft.toFixed(1);
-      
-      // プログレッシブ・タイマー演出
       if (state.timeLeft <= 10) {
         timerValEl.className = "font-bold text-rose-500 animate-pulse text-2xl font-ud-gothic";
       } else if (state.timeLeft <= 30) {
-        timerValEl.className = "font-bold text-orange-400 text-xl font-ud-gothic";
+        timerValEl.className = "font-bold text-orange-500 text-xl font-ud-gothic";
       } else {
-        timerValEl.className = "font-bold text-emerald-400 transition-colors text-xl font-ud-gothic";
+        timerValEl.className = "font-bold text-emerald-500 transition-colors text-xl font-ud-gothic";
       }
     }
 
@@ -1009,10 +1000,10 @@
       displayCards.forEach(card => {
         const cardBtn = document.createElement('button');
         cardBtn.id = `card-${CSS.escape(card.char)}`;
-        cardBtn.className = `karuta-card bg-gradient-to-br from-amber-50 to-orange-50/40 hover:from-amber-100/90 hover:to-orange-100/60 rounded-2xl text-stone-900 flex flex-col items-center justify-center p-2 border-3 md:border-4 border-amber-700/35 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
+        cardBtn.className = `karuta-card bg-white hover:bg-orange-50 rounded-2xl flex flex-col items-center justify-center p-2 border-3 md:border-4 border-slate-200 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
         cardBtn.innerHTML = `
-          <div class="absolute inset-1.5 border border-amber-700/10 rounded-xl pointer-events-none"></div>
-          <span class="${fontSizeClass} font-black text-stone-850 font-klee select-none leading-tight text-center">${card.char}</span>
+          <div class="absolute inset-1.5 border border-slate-100 rounded-xl pointer-events-none"></div>
+          <span class="${fontSizeClass} font-black text-slate-800 font-klee select-none leading-tight text-center">${card.char}</span>
         `;
         cardBtn.addEventListener('click', () => handleCardTap(card));
         karutaBoard.appendChild(cardBtn);
@@ -1076,14 +1067,14 @@
       cardEl.style.transform = 'scale(0.85) rotate(' + (Math.random() * 24 - 12) + 'deg)';
 
       if (winner === 'player') {
-        cardEl.classList.add('border-amber-500', 'bg-amber-200/50');
+        cardEl.classList.add('border-orange-400', 'bg-orange-100');
         const badge = document.createElement('div');
         badge.className = "absolute inset-0 flex items-center justify-center z-10 pointer-events-none";
-        badge.innerHTML = `<span class="bg-amber-500 text-stone-900 text-base font-black px-2 py-0.5 rounded shadow">〇</span>`;
+        badge.innerHTML = `<span class="bg-orange-500 text-white text-base font-black px-2 py-0.5 rounded shadow">〇</span>`;
         cardEl.appendChild(badge);
         createConfettiAtElement(cardEl);
       } else {
-        cardEl.classList.add('border-rose-500', 'bg-rose-200/30');
+        cardEl.classList.add('border-rose-400', 'bg-rose-100');
         const badge = document.createElement('div');
         badge.className = "absolute inset-0 flex items-center justify-center z-10 pointer-events-none";
         const avatarEl = document.getElementById('cpu-avatar');
@@ -1091,8 +1082,8 @@
         cardEl.appendChild(badge);
         const avatarContainer = document.getElementById('cpu-avatar-container');
         if (avatarContainer) {
-          avatarContainer.classList.add('animate-shake', 'bg-rose-900');
-          setTimeout(() => avatarContainer.classList.remove('animate-shake', 'bg-rose-900'), 500);
+          avatarContainer.classList.add('animate-shake', 'bg-rose-200');
+          setTimeout(() => avatarContainer.classList.remove('animate-shake', 'bg-rose-200'), 500);
         }
       }
 
@@ -1120,12 +1111,12 @@
       }
 
       const gameTip = document.getElementById('game-tip');
-      gameTip.className = "text-rose-400 font-bold animate-pulse text-sm text-center";
+      gameTip.className = "text-rose-500 font-bold animate-pulse text-sm text-center";
       gameTip.textContent = "⚠️ まちがい！ すこし うごけません";
 
       setTimeout(() => {
         cardEl.classList.remove('border-rose-500', 'bg-rose-100', 'animate-shake');
-        gameTip.className = "text-stone-300 font-bold text-xs text-center";
+        gameTip.className = "text-slate-500 font-bold text-xs text-center";
         gameTip.textContent = "💡 こえを よく きいて、ただしいもじを タッチしよう！";
         state.isInputLocked = false;
       }, 1000);
@@ -1145,7 +1136,7 @@
       if (charIndex !== -1) {
         const before = phrase.substring(0, charIndex);
         const after  = phrase.substring(charIndex + targetChar.length);
-        currentReadPhraseEl.innerHTML = `${before}<span class="text-rose-600 text-[1.25em] bg-rose-100/50 rounded-lg px-1 border-b-4 border-rose-500">${targetChar}</span>${after}`;
+        currentReadPhraseEl.innerHTML = `${before}<span class="text-rose-500 text-[1.25em] bg-rose-50 rounded-lg px-1 border-b-4 border-rose-400">${targetChar}</span>${after}`;
       } else {
         currentReadPhraseEl.textContent = phrase;
       }
@@ -1164,7 +1155,6 @@
     function scheduleCpuAction() {
       if (state.cpuActionTimeout) clearTimeout(state.cpuActionTimeout);
 
-      // 難易度調整 (げきむず削除、はやいをブースト対応)
       let baseDelay = 11.0;
       let variation = 4.0;
 
@@ -1180,7 +1170,6 @@
       let speedMultiplier = 0.5 + (0.5 * progressRatio);
       
       if (config.cpuLevel === 'hard') {
-        // 後半ブースト: 残り枚数が少ない(progressRatioが0に近い)ほど早くなる
         speedMultiplier = 0.35 + (0.65 * progressRatio);
       }
 
