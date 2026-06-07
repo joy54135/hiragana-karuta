@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ひらがな かるた</title>
+  <title>ひらがな・カタカナ かるた</title>
+  <meta name="description" content="ひらがな・カタカナ・濁音・拗音に対応したかるたゲーム。ひとりでも対戦でも楽しめます。">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap');
     
+    /* --- Ver 1.0 --- */
+
     .font-ud-gothic {
       font-family: "BIZ UDGothic", "UD Digi Kyokasho N-R", "Hiragino Sans", "Hiragino Kaku Gothic ProN", -apple-system, BlinkMacSystemFont, "Meiryo", sans-serif;
     }
@@ -106,6 +109,78 @@
       animation: flash-red 0.5s ease-out;
       pointer-events: none;
     }
+
+    /* 相手の手アニメーション */
+    @keyframes hand-reach {
+      0%   { transform: translateY(-100%) rotate(180deg) scale(0.8); opacity: 0; }
+      30%  { opacity: 1; }
+      70%  { transform: translateY(0%) rotate(180deg) scale(1.1); opacity: 1; }
+      85%  { transform: translateY(-20%) rotate(180deg) scale(0.9); opacity: 0.8; }
+      100% { transform: translateY(-120%) rotate(180deg) scale(0.8); opacity: 0; }
+    }
+    #cpu-hand {
+      position: fixed;
+      font-size: 3rem;
+      z-index: 100;
+      pointer-events: none;
+      display: none;
+      transform-origin: top center;
+    }
+    #cpu-hand.active {
+      display: block;
+      animation: hand-reach 0.9s ease-in-out forwards;
+    }
+
+    /* 設定画面 ステップバイステップ */
+    .wizard-step {
+      transition: all 0.3s ease;
+    }
+    .step-summary-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(251,191,36,0.15);
+      border: 1px solid rgba(251,191,36,0.4);
+      border-radius: 9999px;
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      color: #fde68a;
+      font-weight: bold;
+      margin: 2px;
+    }
+
+    /* ステップ選択ボタン共通 */
+    .opt-btn {
+      padding: 10px 8px;
+      border-radius: 12px;
+      border: 2px solid;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-align: center;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .opt-btn.active {
+      background: rgba(120,53,15,0.5);
+      border-color: #d97706;
+      color: #fde68a;
+    }
+    .opt-btn.inactive {
+      background: #0c0a09;
+      border-color: #292524;
+      color: #57534e;
+    }
+    .opt-btn.inactive:hover {
+      border-color: #78350f;
+      color: #d6d3d1;
+    }
+    .opt-btn.disabled {
+      background: #0c0a09;
+      border-color: #1c1917;
+      color: #3c3532;
+      cursor: default;
+      opacity: 0.4;
+    }
   </style>
 </head>
 <body class="bg-stone-900 text-stone-100 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
@@ -118,7 +193,7 @@
           あ
         </div>
         <div>
-          <h1 class="text-base md:text-xl font-bold text-amber-100 tracking-wider font-ud-gothic">ひらがな かるた</h1>
+          <h1 class="text-base md:text-xl font-bold text-amber-100 tracking-wider font-ud-gothic">ひらがな・カタカナ かるた</h1>
         </div>
       </div>
       
@@ -137,127 +212,159 @@
   <!-- 紙吹雪コンテナ -->
   <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
 
+  <!-- 相手の手 -->
+  <div id="cpu-hand">✋</div>
+
   <!-- メインゲームエリア -->
   <main class="flex-grow flex flex-col relative overflow-hidden h-full">
 
-    <!-- 1. 設定・ホーム画面 -->
+    <!-- ===== 設定・ホーム画面（ウィザード形式） ===== -->
     <section id="screen-start" class="flex-grow flex items-center justify-center p-2 md:p-4 tatami-bg overflow-y-auto">
       <div class="bg-stone-900/95 border-4 border-amber-600 max-w-md w-full p-4 md:p-6 rounded-3xl shadow-2xl text-center relative overflow-hidden">
         
         <div class="flex justify-center mb-2">
           <div class="w-14 h-14 rounded-full border-4 border-amber-500/30 flex items-center justify-center bg-gradient-to-br from-amber-500 to-yellow-600 shadow-md">
-            <span class="text-stone-900 font-bold text-2xl font-ud-gothic">あ</span>
+            <span id="header-char-display" class="text-stone-900 font-bold text-2xl font-klee">あ</span>
           </div>
         </div>
 
-        <h2 class="text-xl md:text-2xl font-bold text-amber-400 tracking-wider mb-1 font-ud-gothic">ひらがな かるた</h2>
-        <p class="text-sm text-stone-300 mb-4 font-bold">たくさん カードを とれるかな？</p>
+        <h2 class="text-xl md:text-2xl font-bold text-amber-400 tracking-wider mb-1 font-ud-gothic">ひらがな・カタカナ かるた</h2>
+        <p class="text-xs text-stone-400 mb-3 font-bold">Ver 1.0</p>
 
-        <!-- 設定項目 -->
-        <div class="space-y-4 text-left max-w-sm mx-auto text-sm">
-          
-          <!-- ゲームモード -->
-          <div>
-            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
-              <i data-lucide="gamepad-2" class="w-4 h-4"></i> あそびかた
-            </label>
-            <div class="grid grid-cols-2 gap-2">
-              <button id="mode-solo" class="mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-amber-950/40 border-amber-500 text-amber-200 shadow-md" data-mode="solo">
-                <i data-lucide="user" class="w-5 h-5 mb-1"></i>
-                ひとりで あそぶ
-              </button>
-              <button id="mode-vs" class="mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-stone-950 border-stone-800 text-stone-400 hover:border-amber-900 hover:text-amber-300" data-mode="vs">
-                <i data-lucide="users" class="w-5 h-5 mb-1"></i>
-                あいてと あそぶ
-              </button>
-            </div>
+        <!-- 選択済みサマリーバッジ -->
+        <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
+
+        <!-- ====== ウィザードステップ ====== -->
+
+        <!-- Step 1: あそびかた -->
+        <div id="step-1" class="wizard-step text-left">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">1</span>
+            あそびかたを えらんでね
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="step1-solo" class="opt-btn active flex flex-col items-center gap-1" onclick="selectStep1('solo')">
+              <span class="text-2xl">🙋</span>
+              ひとりで あそぶ
+            </button>
+            <button id="step1-vs" class="opt-btn inactive flex flex-col items-center gap-1" onclick="selectStep1('vs')">
+              <span class="text-2xl">🤝</span>
+              あいてと あそぶ
+            </button>
           </div>
-
-          <!-- 対戦相手のレベル -->
-          <div id="cpu-level-wrapper" class="hidden">
-            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
-              <i data-lucide="bot" class="w-4 h-4"></i> あいての つよさ
-            </label>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200" data-level="easy">
-                <span class="block text-xl mb-0.5">🐰</span>
-                ゆっくり
-              </button>
-              <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-level="medium">
-                <span class="block text-xl mb-0.5">🦊</span>
-                ふつう
-              </button>
-              <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-level="hard">
-                <span class="block text-xl mb-0.5">🐉</span>
-                はやい
-              </button>
-              <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-level="expert">
-                <span class="block text-xl mb-0.5">👹</span>
-                げきむず
-              </button>
-            </div>
-          </div>
-
-          <!-- 読み上げ速度設定 -->
-          <div>
-            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
-              <i data-lucide="gauge" class="w-4 h-4"></i> こえの はやさ
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-              <button class="speed-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200" data-speed="0.85">
-                ゆっくり
-              </button>
-              <button class="speed-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-speed="1.05">
-                ふつう
-              </button>
-              <button class="speed-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-speed="1.30">
-                はやい
-              </button>
-            </div>
-          </div>
-
-          <!-- カード枚数選択 -->
-          <div>
-            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
-              <i data-lucide="layout-grid" class="w-4 h-4"></i> カードの かず
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-              <button class="size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-size="9">
-                9まい<br><span class="text-[10px] text-stone-500 font-normal">45びょう</span>
-              </button>
-              <button class="size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200" data-size="16">
-                16まい<br><span class="text-[10px] text-amber-400 font-normal">80びょう</span>
-              </button>
-              <button class="size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-size="25">
-                25まい<br><span class="text-[10px] text-stone-500 font-normal">120びょう</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- 絵のヒント -->
-          <div>
-            <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
-              <i data-lucide="image" class="w-4 h-4"></i> えの ひんと
-            </label>
-            <div class="grid grid-cols-2 gap-2">
-              <button id="hint-on" class="hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md" data-hint="true">
-                <i data-lucide="eye" class="w-4 h-4"></i> あり (かんたん)
-              </button>
-              <button id="hint-off" class="hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400" data-hint="false">
-                <i data-lucide="eye-off" class="w-4 h-4"></i> なし (ふつう)
-              </button>
-            </div>
-          </div>
-
+          <button class="mt-3 w-full bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded-xl text-sm tracking-wide transition-colors" onclick="goToStep(2)">
+            つぎへ →
+          </button>
         </div>
 
-        <button id="start-game-btn" class="mt-6 w-full max-w-sm bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-stone-950 font-black text-xl py-4 px-6 rounded-2xl shadow-xl hover:shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0 tracking-wider font-ud-gothic">
-          ゲームを はじめる！
-        </button>
+        <!-- Step 2: もじの種類（ひらがな/カタカナ） -->
+        <div id="step-2" class="wizard-step text-left hidden">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">2</span>
+            もじのしゅるいを えらんでね
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="step2-hira" class="opt-btn active flex flex-col items-center gap-1" onclick="selectStep2('hiragana')">
+              <span class="text-2xl font-klee">あ</span>
+              ひらがな
+            </button>
+            <button id="step2-kata" class="opt-btn inactive flex flex-col items-center gap-1" onclick="selectStep2('katakana')">
+              <span class="text-2xl font-klee">ア</span>
+              カタカナ
+            </button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(1)">← もどる</button>
+            <button class="flex-1 bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(3)">つぎへ →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: おと（せいおん/だくおん/ようおん） -->
+        <div id="step-3" class="wizard-step text-left hidden">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">3</span>
+            どのもじで あそぶ？
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="step3-sei" class="opt-btn active flex flex-col items-center gap-1 text-xs" onclick="selectStep3('seion')">
+              <span class="text-xl font-klee" id="sei-sample">あ〜ん</span>
+              せいおん
+              <span class="text-[10px] text-stone-400 font-normal">46もじ</span>
+            </button>
+            <button id="step3-daku" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectStep3('dakuon')">
+              <span class="text-xl font-klee" id="daku-sample">が〜ぽ</span>
+              だくおん
+              <span class="text-[10px] text-stone-400 font-normal">25もじ</span>
+            </button>
+            <button id="step3-you" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectStep3('youon')">
+              <span class="text-xl font-klee" id="you-sample">きゃ〜ぴょ</span>
+              ようおん
+              <span class="text-[10px] text-stone-400 font-normal">33もじ</span>
+            </button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(2)">← もどる</button>
+            <button class="flex-1 bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(4)">つぎへ →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: あいての強さ（vs時のみ）またはスキップ -->
+        <div id="step-4" class="wizard-step text-left hidden">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">4</span>
+            <span id="step4-label">あいての つよさを えらんでね</span>
+          </p>
+          <div id="step4-cpu" class="grid grid-cols-2 gap-2">
+            <button id="step4-easy"   class="opt-btn active flex flex-col items-center gap-1 text-xs"  onclick="selectCpuLevel('easy')">  <span class="text-xl">🐰</span>ゆっくり</button>
+            <button id="step4-medium" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectCpuLevel('medium')"><span class="text-xl">🦊</span>ふつう</button>
+            <button id="step4-hard"   class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectCpuLevel('hard')">  <span class="text-xl">🐉</span>はやい</button>
+            <button id="step4-expert" class="opt-btn inactive flex flex-col items-center gap-1 text-xs" onclick="selectCpuLevel('expert')"><span class="text-xl">👹</span>げきむず</button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(3)">← もどる</button>
+            <button class="flex-1 bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(5)">つぎへ →</button>
+          </div>
+        </div>
+
+        <!-- Step 5: こえのはやさ -->
+        <div id="step-5" class="wizard-step text-left hidden">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">5</span>
+            こえの はやさを えらんでね
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="step5-slow"   class="opt-btn active text-sm"   onclick="selectSpeed(0.85)">ゆっくり</button>
+            <button id="step5-normal" class="opt-btn inactive text-sm" onclick="selectSpeed(1.05)">ふつう</button>
+            <button id="step5-fast"   class="opt-btn inactive text-sm" onclick="selectSpeed(1.30)">はやい</button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button class="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-2 rounded-xl text-sm transition-colors" id="step5-back-btn" onclick="goToStep(4)">← もどる</button>
+            <button class="flex-1 bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(6)">つぎへ →</button>
+          </div>
+        </div>
+
+        <!-- Step 6: カードのかず + はじめる -->
+        <div id="step-6" class="wizard-step text-left hidden">
+          <p class="text-sm font-bold text-amber-300 mb-2 tracking-wide flex items-center gap-2">
+            <span class="bg-amber-600 text-stone-900 rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">6</span>
+            カードの かずを えらんでね
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            <button id="step6-9"  class="opt-btn inactive text-sm" onclick="selectSize(9)">9まい<br><span class="text-[10px] text-stone-400 font-normal">45びょう</span></button>
+            <button id="step6-16" class="opt-btn active text-sm"   onclick="selectSize(16)">16まい<br><span class="text-[10px] text-amber-400 font-normal">80びょう</span></button>
+            <button id="step6-25" class="opt-btn inactive text-sm" onclick="selectSize(25)">25まい<br><span class="text-[10px] text-stone-400 font-normal">120びょう</span></button>
+          </div>
+
+          <button id="start-game-btn" class="mt-4 w-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-stone-950 font-black text-xl py-4 px-6 rounded-2xl shadow-xl hover:shadow-amber-500/20 transition-all transform hover:-translate-y-0.5 active:translate-y-0 tracking-wider font-ud-gothic">
+            ゲームを はじめる！🎮
+          </button>
+          <button class="mt-2 w-full bg-stone-700 hover:bg-stone-600 text-stone-200 font-bold py-2 rounded-xl text-sm transition-colors" onclick="goToStep(5)">← もどる</button>
+        </div>
+
       </div>
     </section>
 
-    <!-- 2. ゲーム本番画面 -->
+    <!-- ===== ゲーム本番画面 ===== -->
     <section id="screen-game" class="flex-grow h-full flex flex-col hidden tatami-bg overflow-hidden">
       
       <!-- 上部: 相手エリア -->
@@ -302,7 +409,7 @@
             </div>
           </div>
 
-          <!-- 中央: 読み札表示エリア (文字をかなり大きく見やすく) -->
+          <!-- 中央: 読み札表示エリア -->
           <div class="bg-amber-50 text-stone-900 border-4 border-amber-800 rounded-2xl py-3 px-6 shadow-xl relative overflow-hidden flex-grow w-full md:w-auto flex flex-col justify-center">
             <div class="absolute inset-0.5 border-2 border-amber-800/10 rounded-xl pointer-events-none"></div>
             <div class="flex items-center justify-center space-x-2 z-10 mb-1">
@@ -329,12 +436,12 @@
           </div>
 
         </div>
-        <p id="game-tip" class="text-xs text-stone-300 leading-tight font-bold mt-2 text-center">💡 こえを よく きいて、ただしい ひらがなを タッチしよう！</p>
+        <p id="game-tip" class="text-xs text-stone-300 leading-tight font-bold mt-2 text-center">💡 こえを よく きいて、ただしいもじを タッチしよう！</p>
       </div>
 
     </section>
 
-    <!-- 3. 結果画面 -->
+    <!-- ===== 結果画面 ===== -->
     <section id="screen-result" class="flex-grow flex items-center justify-center p-3 md:p-6 tatami-bg hidden overflow-y-auto">
       <div class="bg-stone-900/95 border-4 border-amber-600 max-w-md w-full p-6 md:p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden">
         
@@ -395,77 +502,164 @@
         <div class="bg-stone-950 p-4 rounded-xl border border-white/5">
           <span class="text-amber-200 block mb-1">🎮 ルール</span>
           1. 「ありさんの あ」のように、こえが きこえるよ。<br>
-          2. がめんの なかから、ただしい「ひらがな」を タッチしてね。<br>
+          2. がめんの なかから、ただしいもじを タッチしてね。<br>
           3. じかんが なくなる まえに、ぜんぶの カードを とろう！
         </div>
 
         <div class="bg-stone-950 p-4 rounded-xl border border-white/5">
           <span class="text-rose-400 block mb-1">⚠️ まちがい（おてつき）</span>
-          ちがう ひらがなを えらぶと、すこし うごけなく なるよ。よく みて えらぼうね！
+          ちがうもじを えらぶと、すこし うごけなく なるよ。よく みて えらぼうね！
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // --- かるたのフルデータ定義 ---
-    const allKaruta = [
-      { char: 'あ', phrase: 'ありさんの、あ！', emoji: '🐜' },
-      { char: 'い', phrase: 'いちごの、い！', emoji: '🍓' },
-      { char: 'う', phrase: 'うさぎの、う！', emoji: '🐰' },
-      { char: 'え', phrase: 'えんぴつの、え！', emoji: '✏️' },
-      { char: 'お', phrase: 'おにぎりの、お！', emoji: '🍙' },
-      { char: 'か', phrase: 'かえるの、か！', emoji: '🐸' },
-      { char: 'き', phrase: 'きりんの、き！', emoji: '🦒' },
-      { char: 'く', phrase: 'くるまの、く！', emoji: '🚗' },
-      { char: 'け', phrase: 'けーきの、け！', emoji: '🎂' },
-      { char: 'こ', phrase: 'こまの、こ！', emoji: '🌀' },
-      { char: 'さ', phrase: 'さかなの、さ！', emoji: '🐟' },
-      { char: 'し', phrase: 'しんかんせんの、し！', emoji: '🚄' },
-      { char: 'す', phrase: 'すいかの、す！', emoji: '🍉' },
-      { char: 'せ', phrase: 'せんせいの、せ！', emoji: '🏫' },
-      { char: 'そ', phrase: 'そらの、そ！', emoji: '☁️' },
-      { char: 'た', phrase: 'たいこの、た！', emoji: '🥁' },
-      { char: 'ち', phrase: 'ちきゅうの、ち！', emoji: '🌍' },
-      { char: 'つ', phrase: 'つくえの、つ！', emoji: '🪑' },
-      { char: 'て', phrase: 'てがみの、て！', emoji: '✉️' },
-      { char: 'と', phrase: 'とまとの、と！', emoji: '🍅' },
-      { char: 'な', phrase: 'なすの、な！', emoji: '🍆' },
-      { char: 'に', phrase: 'にんじんの、に！', emoji: '🥕' },
-      { char: 'ぬ', phrase: 'ぬりえの、ぬ！', emoji: '🎨' },
-      { char: 'ね', phrase: 'ねこの、ね！', emoji: '🐱' },
-      { char: 'の', phrase: 'のりものの、の！', emoji: '🚌' },
-      { char: 'は', phrase: 'はなの、は！', emoji: '🌸' },
-      { char: 'ひ', phrase: 'ひこうきの、ひ！', emoji: '✈️' },
-      { char: 'ふ', phrase: 'ふうせんの、ふ！', emoji: '🎈' },
-      { char: 'へ', phrase: 'へびの、へ！', emoji: '🐍' },
-      { char: 'ほ', phrase: 'ほしの、ほ！', emoji: '⭐' },
-      { char: 'ま', phrase: 'まいくの、ま！', emoji: '🎤' },
-      { char: 'み', phrase: 'みかんの、み！', emoji: '🍊' },
-      { char: 'む', phrase: 'むしの、む！', emoji: '🐛' },
-      { char: 'め', phrase: 'めがねの、め！', emoji: '👓' },
-      { char: 'も', phrase: 'もものの、も！', emoji: '🍑' },
-      { char: 'や', phrase: 'やまの、や！', emoji: '🗻' },
-      { char: 'ゆ', phrase: 'ゆきの、ゆ！', emoji: '❄️' },
-      { char: 'よ', phrase: 'よっとの、よ！', emoji: '⛵' },
-      { char: 'ら', phrase: 'らいおんの、ら！', emoji: '🦁' },
-      { char: 'り', phrase: 'りんごの、り！', emoji: '🍎' },
-      { char: 'る', phrase: 'るすばんの、る！', emoji: '🏠' },
-      { char: 'れ', phrase: 'れもんの、れ！', emoji: '🍋' },
-      { char: 'ろ', phrase: 'ろけっとの、ろ！', emoji: '🚀' },
-      { char: 'わ', phrase: 'わたあめの、わ！', emoji: '🍭' },
-      { char: 'を', phrase: 'ほんをよむの、を！', emoji: '📖' },
-      { char: 'ん', phrase: 'ぱんの、ん！', emoji: '🍞' }
+    // ============================================================
+    //   Ver 1.0 - ひらがな・カタカナ かるた
+    // ============================================================
+
+    // --- ひらがな せいおん データ ---
+    const seionHira = [
+      { char: 'あ', phrase: 'ありさんの、あ！' },
+      { char: 'い', phrase: 'いちごの、い！' },
+      { char: 'う', phrase: 'うさぎの、う！' },
+      { char: 'え', phrase: 'えんぴつの、え！' },
+      { char: 'お', phrase: 'おにぎりの、お！' },
+      { char: 'か', phrase: 'かえるの、か！' },
+      { char: 'き', phrase: 'きりんの、き！' },
+      { char: 'く', phrase: 'くるまの、く！' },
+      { char: 'け', phrase: 'けーきの、け！' },
+      { char: 'こ', phrase: 'こまの、こ！' },
+      { char: 'さ', phrase: 'さかなの、さ！' },
+      { char: 'し', phrase: 'しんかんせんの、し！' },
+      { char: 'す', phrase: 'すいかの、す！' },
+      { char: 'せ', phrase: 'せんせいの、せ！' },
+      { char: 'そ', phrase: 'そらの、そ！' },
+      { char: 'た', phrase: 'たいこの、た！' },
+      { char: 'ち', phrase: 'ちきゅうの、ち！' },
+      { char: 'つ', phrase: 'つくえの、つ！' },
+      { char: 'て', phrase: 'てがみの、て！' },
+      { char: 'と', phrase: 'とまとの、と！' },
+      { char: 'な', phrase: 'なすの、な！' },
+      { char: 'に', phrase: 'にんじんの、に！' },
+      { char: 'ぬ', phrase: 'ぬりえの、ぬ！' },
+      { char: 'ね', phrase: 'ねこの、ね！' },
+      { char: 'の', phrase: 'のりものの、の！' },
+      { char: 'は', phrase: 'はなの、は！' },
+      { char: 'ひ', phrase: 'ひこうきの、ひ！' },
+      { char: 'ふ', phrase: 'ふうせんの、ふ！' },
+      { char: 'へ', phrase: 'へびの、へ！' },
+      { char: 'ほ', phrase: 'ほしの、ほ！' },
+      { char: 'ま', phrase: 'まいくの、ま！' },
+      { char: 'み', phrase: 'みかんの、み！' },
+      { char: 'む', phrase: 'むしの、む！' },
+      { char: 'め', phrase: 'めがねの、め！' },
+      { char: 'も', phrase: 'もものの、も！' },
+      { char: 'や', phrase: 'やまの、や！' },
+      { char: 'ゆ', phrase: 'ゆきの、ゆ！' },
+      { char: 'よ', phrase: 'よっとの、よ！' },
+      { char: 'ら', phrase: 'らいおんの、ら！' },
+      { char: 'り', phrase: 'りんごの、り！' },
+      { char: 'る', phrase: 'るすばんの、る！' },
+      { char: 'れ', phrase: 'れもんの、れ！' },
+      { char: 'ろ', phrase: 'ろけっとの、ろ！' },
+      { char: 'わ', phrase: 'わたあめの、わ！' },
+      { char: 'を', phrase: 'ほんをよむの、を！' },
+      { char: 'ん', phrase: 'ぱんの、ん！' }
     ];
 
-    // ゲーム状態・設定
+    // --- ひらがな だくおん・はんだくおん データ ---
+    const dakuonHira = [
+      { char: 'が', phrase: 'がらすの、が！' },
+      { char: 'ぎ', phrase: 'ぎんこうの、ぎ！' },
+      { char: 'ぐ', phrase: 'ぐるーぷの、ぐ！' },
+      { char: 'げ', phrase: 'げんきの、げ！' },
+      { char: 'ご', phrase: 'ごりらの、ご！' },
+      { char: 'ざ', phrase: 'ざるの、ざ！' },
+      { char: 'じ', phrase: 'じてんしゃの、じ！' },
+      { char: 'ず', phrase: 'ずかんの、ず！' },
+      { char: 'ぜ', phrase: 'ぜりーの、ぜ！' },
+      { char: 'ぞ', phrase: 'ぞうの、ぞ！' },
+      { char: 'だ', phrase: 'だるまの、だ！' },
+      { char: 'ぢ', phrase: 'ぢめんの、ぢ！' },
+      { char: 'づ', phrase: 'づつみの、づ！' },
+      { char: 'で', phrase: 'でんしゃの、で！' },
+      { char: 'ど', phrase: 'どらごんの、ど！' },
+      { char: 'ば', phrase: 'ばななの、ば！' },
+      { char: 'び', phrase: 'びょういんの、び！' },
+      { char: 'ぶ', phrase: 'ぶどうの、ぶ！' },
+      { char: 'べ', phrase: 'べるの、べ！' },
+      { char: 'ぼ', phrase: 'ぼうしの、ぼ！' },
+      { char: 'ぱ', phrase: 'ぱいなっぷるの、ぱ！' },
+      { char: 'ぴ', phrase: 'ぴあのの、ぴ！' },
+      { char: 'ぷ', phrase: 'ぷりんの、ぷ！' },
+      { char: 'ぺ', phrase: 'ぺんぎんの、ぺ！' },
+      { char: 'ぽ', phrase: 'ぽすとの、ぽ！' }
+    ];
+
+    // --- ひらがな ようおん データ ---
+    const youonHira = [
+      { char: 'きゃ', phrase: 'きゃべつの、きゃ！' },
+      { char: 'きゅ', phrase: 'きゅうりの、きゅ！' },
+      { char: 'きょ', phrase: 'きょうしつの、きょ！' },
+      { char: 'しゃ', phrase: 'しゃしんの、しゃ！' },
+      { char: 'しゅ', phrase: 'しゅくだいの、しゅ！' },
+      { char: 'しょ', phrase: 'しょうぼうしゃの、しょ！' },
+      { char: 'ちゃ', phrase: 'ちゃわんの、ちゃ！' },
+      { char: 'ちゅ', phrase: 'ちゅーりっぷの、ちゅ！' },
+      { char: 'ちょ', phrase: 'ちょこの、ちょ！' },
+      { char: 'にゃ', phrase: 'にゃんこの、にゃ！' },
+      { char: 'にゅ', phrase: 'にゅうにゅうの、にゅ！' },
+      { char: 'にょ', phrase: 'にょろにょろの、にょ！' },
+      { char: 'ひゃ', phrase: 'ひゃくえんの、ひゃ！' },
+      { char: 'ひゅ', phrase: 'ひゅーの、ひゅ！' },
+      { char: 'ひょ', phrase: 'ひょうたんの、ひょ！' },
+      { char: 'みゃ', phrase: 'みゃくの、みゃ！' },
+      { char: 'みゅ', phrase: 'みゅーじっくの、みゅ！' },
+      { char: 'みょ', phrase: 'みょうじの、みょ！' },
+      { char: 'りゃ', phrase: 'りゃくごの、りゃ！' },
+      { char: 'りゅ', phrase: 'りゅうの、りゅ！' },
+      { char: 'りょ', phrase: 'りょうりの、りょ！' },
+      { char: 'ぎゃ', phrase: 'ぎゃくの、ぎゃ！' },
+      { char: 'ぎゅ', phrase: 'ぎゅうにゅうの、ぎゅ！' },
+      { char: 'ぎょ', phrase: 'ぎょうざの、ぎょ！' },
+      { char: 'じゃ', phrase: 'じゃがいもの、じゃ！' },
+      { char: 'じゅ', phrase: 'じゅーすの、じゅ！' },
+      { char: 'じょ', phrase: 'じょうろの、じょ！' },
+      { char: 'びゃ', phrase: 'びゃくの、びゃ！' },
+      { char: 'びゅ', phrase: 'びゅーの、びゅ！' },
+      { char: 'びょ', phrase: 'びょういんの、びょ！' },
+      { char: 'ぴゃ', phrase: 'ぴゃーの、ぴゃ！' },
+      { char: 'ぴゅ', phrase: 'ぴゅーの、ぴゅ！' },
+      { char: 'ぴょ', phrase: 'ぴょんぴょんの、ぴょ！' }
+    ];
+
+    // カタカナ変換マップ（ひらがな → カタカナ）
+    function toKatakana(str) {
+      return str.replace(/[\u3041-\u3096]/g, ch =>
+        String.fromCharCode(ch.charCodeAt(0) + 0x60)
+      );
+    }
+
+    // カタカナ版のデータを生成する関数
+    function buildKatakanaSet(hiraSet) {
+      return hiraSet.map(item => ({
+        char: toKatakana(item.char),
+        phrase: toKatakana(item.phrase)
+      }));
+    }
+
+    // ゲーム設定
     const config = {
       mode: 'solo',
+      script: 'hiragana',   // 'hiragana' | 'katakana'
+      soundType: 'seion',   // 'seion' | 'dakuon' | 'youon'
       cpuLevel: 'easy',
-      size: 16, 
-      speed: 0.85, 
+      size: 16,
+      speed: 0.85,
       soundOn: true,
-      showEmojiHint: true
+      currentStep: 1
     };
 
     const state = {
@@ -485,12 +679,161 @@
     const mainHeader = document.getElementById('main-header');
 
     function getLimitTime(size) {
-      if (size === 9) return 45;   
-      if (size === 16) return 80;  
-      return 120;                  
+      if (size === 9)  return 45;
+      if (size === 16) return 80;
+      return 120;
     }
 
-    // --- 効果音システム (Web Audio API) ---
+    // 現在の設定に応じたカルタデータを返す
+    function getCurrentKarutaData() {
+      let base;
+      if (config.soundType === 'seion')  base = seionHira;
+      else if (config.soundType === 'dakuon') base = dakuonHira;
+      else base = youonHira;
+
+      if (config.script === 'katakana') {
+        return buildKatakanaSet(base);
+      }
+      return base;
+    }
+
+    // ===== ウィザードロジック =====
+
+    function goToStep(n) {
+      // vs以外でStep4（あいての強さ）をスキップ
+      if (n === 4 && config.mode === 'solo') {
+        n = (arguments[1] === 'back') ? 3 : 5;
+      }
+
+      // 全ステップ非表示
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (el) el.classList.add('hidden');
+      }
+      config.currentStep = n;
+      const target = document.getElementById(`step-${n}`);
+      if (target) target.classList.remove('hidden');
+
+      // Step4のラベル調整
+      if (n === 4) {
+        document.getElementById('step4-label').textContent = 'あいての つよさを えらんでね';
+        document.getElementById('step4-cpu').style.display = '';
+      }
+
+      updateSummary();
+      updateHeaderChar();
+    }
+
+    // "もどる" でStep4をvs時のみ表示
+    document.getElementById('step5-back-btn').addEventListener('click', function() {
+      if (config.mode === 'vs') goToStep(4);
+      else goToStep(3);
+    });
+
+    function selectStep1(mode) {
+      config.mode = mode;
+      document.getElementById('step1-solo').className = mode === 'solo' ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
+      document.getElementById('step1-vs').className  = mode === 'vs'   ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
+      updateSummary();
+    }
+
+    function selectStep2(script) {
+      config.script = script;
+      document.getElementById('step2-hira').className = script === 'hiragana' ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
+      document.getElementById('step2-kata').className = script === 'katakana' ? 'opt-btn active flex flex-col items-center gap-1' : 'opt-btn inactive flex flex-col items-center gap-1';
+      // サンプル文字を更新
+      const isSei  = config.soundType === 'seion';
+      const isDaku = config.soundType === 'dakuon';
+      if (script === 'katakana') {
+        document.getElementById('sei-sample').textContent  = 'ア〜ン';
+        document.getElementById('daku-sample').textContent = 'ガ〜ポ';
+        document.getElementById('you-sample').textContent  = 'キャ〜ピョ';
+      } else {
+        document.getElementById('sei-sample').textContent  = 'あ〜ん';
+        document.getElementById('daku-sample').textContent = 'が〜ぽ';
+        document.getElementById('you-sample').textContent  = 'きゃ〜ぴょ';
+      }
+      updateSummary();
+      updateHeaderChar();
+    }
+
+    function selectStep3(soundType) {
+      config.soundType = soundType;
+      document.getElementById('step3-sei').className  = soundType === 'seion'  ? 'opt-btn active flex flex-col items-center gap-1 text-xs'  : 'opt-btn inactive flex flex-col items-center gap-1 text-xs';
+      document.getElementById('step3-daku').className = soundType === 'dakuon' ? 'opt-btn active flex flex-col items-center gap-1 text-xs' : 'opt-btn inactive flex flex-col items-center gap-1 text-xs';
+      document.getElementById('step3-you').className  = soundType === 'youon'  ? 'opt-btn active flex flex-col items-center gap-1 text-xs'  : 'opt-btn inactive flex flex-col items-center gap-1 text-xs';
+      updateSummary();
+      updateHeaderChar();
+    }
+
+    function selectCpuLevel(level) {
+      config.cpuLevel = level;
+      ['easy','medium','hard','expert'].forEach(l => {
+        document.getElementById(`step4-${l}`).className = l === level
+          ? 'opt-btn active flex flex-col items-center gap-1 text-xs'
+          : 'opt-btn inactive flex flex-col items-center gap-1 text-xs';
+      });
+      updateSummary();
+    }
+
+    function selectSpeed(spd) {
+      config.speed = spd;
+      document.getElementById('step5-slow').className   = spd === 0.85 ? 'opt-btn active text-sm'   : 'opt-btn inactive text-sm';
+      document.getElementById('step5-normal').className = spd === 1.05 ? 'opt-btn active text-sm' : 'opt-btn inactive text-sm';
+      document.getElementById('step5-fast').className   = spd === 1.30 ? 'opt-btn active text-sm'   : 'opt-btn inactive text-sm';
+      updateSummary();
+    }
+
+    function selectSize(size) {
+      config.size = size;
+      [9,16,25].forEach(s => {
+        document.getElementById(`step6-${s}`).className = s === size
+          ? 'opt-btn active text-sm'
+          : 'opt-btn inactive text-sm';
+      });
+      updateSummary();
+    }
+
+    function updateHeaderChar() {
+      const data = getCurrentKarutaData();
+      const sample = data[0];
+      document.getElementById('header-char-display').textContent = sample ? sample.char[0] : 'あ';
+    }
+
+    function updateSummary() {
+      const summaryEl = document.getElementById('settings-summary');
+      const tags = [];
+
+      // あそびかた
+      if (config.currentStep >= 2) {
+        tags.push(config.mode === 'solo' ? '🙋 ひとり' : '🤝 あいてと');
+      }
+      // もじ
+      if (config.currentStep >= 3) {
+        tags.push(config.script === 'hiragana' ? 'あ ひらがな' : 'ア カタカナ');
+      }
+      // おと
+      if (config.currentStep >= 4) {
+        if (config.soundType === 'seion')  tags.push('🔤 せいおん');
+        if (config.soundType === 'dakuon') tags.push('🔤 だくおん');
+        if (config.soundType === 'youon')  tags.push('🔤 ようおん');
+      }
+      // CPUレベル（vs + step4以降）
+      if (config.mode === 'vs' && config.currentStep >= 5) {
+        const lvMap = { easy: '🐰 ゆっくり', medium: '🦊 ふつう', hard: '🐉 はやい', expert: '👹 げきむず' };
+        tags.push(lvMap[config.cpuLevel]);
+      }
+      // こえのはやさ
+      if (config.currentStep >= 6) {
+        if (config.speed === 0.85) tags.push('🐢 こえ:ゆっくり');
+        if (config.speed === 1.05) tags.push('🐇 こえ:ふつう');
+        if (config.speed === 1.30) tags.push('⚡ こえ:はやい');
+      }
+
+      summaryEl.innerHTML = tags.map(t => `<span class="step-summary-tag">${t}</span>`).join('');
+    }
+
+    // ===== 効果音システム (Web Audio API) =====
     const sound = {
       ctx: null,
       init() {
@@ -555,8 +898,8 @@
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(329.63, now); 
-        osc.frequency.exponentialRampToValueAtTime(220.00, now + 0.15); 
+        osc.frequency.setValueAtTime(329.63, now);
+        osc.frequency.exponentialRampToValueAtTime(220.00, now + 0.15);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.connect(gain);
@@ -567,86 +910,48 @@
     };
 
     // DOM要素
-    const startScreen = document.getElementById('screen-start');
-    const gameScreen = document.getElementById('screen-game');
+    const startScreen  = document.getElementById('screen-start');
+    const gameScreen   = document.getElementById('screen-game');
     const resultScreen = document.getElementById('screen-result');
 
-    const modeSoloBtn = document.getElementById('mode-solo');
-    const modeVsBtn = document.getElementById('mode-vs');
-    const cpuLevelWrapper = document.getElementById('cpu-level-wrapper');
-    const cpuSelectBtns = document.querySelectorAll('.cpu-select-btn');
-    const speedSelectBtns = document.querySelectorAll('.speed-select-btn');
-    const sizeSelectBtns = document.querySelectorAll('.size-select-btn');
-    const startGameBtn = document.getElementById('start-game-btn');
-
+    const startGameBtn   = document.getElementById('start-game-btn');
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
-    const soundIcon = document.getElementById('sound-icon');
-    const helpBtn = document.getElementById('help-btn');
-    const helpModal = document.getElementById('help-modal');
-    const closeHelpBtn = document.getElementById('close-help-btn');
+    const soundIcon      = document.getElementById('sound-icon');
+    const helpBtn        = document.getElementById('help-btn');
+    const helpModal      = document.getElementById('help-modal');
+    const closeHelpBtn   = document.getElementById('close-help-btn');
 
-    const playerScoreEl = document.getElementById('player-score');
-    const cpuStatusEl = document.getElementById('cpu-status');
-    const cpuAvatarEl = document.getElementById('cpu-avatar');
-    const cpuScoreEl = document.getElementById('cpu-score');
+    const playerScoreEl    = document.getElementById('player-score');
+    const cpuScoreEl       = document.getElementById('cpu-score');
     const remainingCountEl = document.getElementById('remaining-count');
-    const timerValEl = document.getElementById('timer-val');
-    
+    const timerValEl       = document.getElementById('timer-val');
     const currentReadPhraseEl = document.getElementById('current-read-phrase');
-    const replayBtn = document.getElementById('replay-btn');
-    const karutaBoard = document.getElementById('karuta-board');
-    const abandonBtn = document.getElementById('abandon-btn');
+    const replayBtn        = document.getElementById('replay-btn');
+    const karutaBoard      = document.getElementById('karuta-board');
+    const abandonBtn       = document.getElementById('abandon-btn');
 
     const resultStatusBadge = document.getElementById('result-status-badge');
-    const resultTitle = document.getElementById('result-title');
-    const resultSubtitle = document.getElementById('result-subtitle');
-    const resPlayerScoreEl = document.getElementById('res-player-score');
-    const resCpuRow = document.getElementById('res-cpu-row');
-    const resCpuScoreEl = document.getElementById('res-cpu-score');
-    const resTimeEl = document.getElementById('res-time');
-    const resMissEl = document.getElementById('res-miss');
-    const rematchBtn = document.getElementById('rematch-btn');
-    const toStartBtn = document.getElementById('to-start-btn');
+    const resultTitle       = document.getElementById('result-title');
+    const resultSubtitle    = document.getElementById('result-subtitle');
+    const resPlayerScoreEl  = document.getElementById('res-player-score');
+    const resCpuRow         = document.getElementById('res-cpu-row');
+    const resCpuScoreEl     = document.getElementById('res-cpu-score');
+    const resTimeEl         = document.getElementById('res-time');
+    const resMissEl         = document.getElementById('res-miss');
+    const rematchBtn        = document.getElementById('rematch-btn');
+    const toStartBtn        = document.getElementById('to-start-btn');
 
-    // 初期化
+    const cpuHandEl = document.getElementById('cpu-hand');
+
+    // ===== 初期化 =====
     window.onload = function() {
       lucide.createIcons();
 
-      // UIクリックイベント
-      modeSoloBtn.addEventListener('click', () => setMode('solo'));
-      modeVsBtn.addEventListener('click', () => setMode('vs'));
+      // 初期サマリー更新
+      updateSummary();
+      updateHeaderChar();
 
-      cpuSelectBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          cpuSelectBtns.forEach(b => b.className = "cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400");
-          btn.className = "cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200";
-          config.cpuLevel = btn.getAttribute('data-level');
-        });
-      });
-
-      speedSelectBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          speedSelectBtns.forEach(b => b.className = "speed-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400");
-          btn.className = "speed-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200";
-          config.speed = parseFloat(btn.getAttribute('data-speed'));
-        });
-      });
-
-      sizeSelectBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          sizeSelectBtns.forEach(b => b.className = "size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400");
-          btn.className = "size-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200";
-          config.size = parseInt(btn.getAttribute('data-size'));
-        });
-      });
-
-      // 絵のヒントトグルのバインド
-      const hintOnBtn = document.getElementById('hint-on');
-      const hintOffBtn = document.getElementById('hint-off');
-      hintOnBtn.addEventListener('click', () => setHint(true));
-      hintOffBtn.addEventListener('click', () => setHint(false));
-
-      // 音声の切り替え
+      // 音声トグル
       soundToggleBtn.addEventListener('click', () => {
         config.soundOn = !config.soundOn;
         if (config.soundOn) {
@@ -662,13 +967,15 @@
       helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
       closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
 
-      // ゲーム開始ボタンのハンドリング
+      // ゲーム開始
       startGameBtn.addEventListener('click', handleStartClick);
       abandonBtn.addEventListener('click', abandonGame);
       rematchBtn.addEventListener('click', handleStartClick);
       toStartBtn.addEventListener('click', () => {
         resultScreen.classList.add('hidden');
         startScreen.classList.remove('hidden');
+        mainHeader.classList.remove('hidden');
+        goToStep(1);
       });
 
       replayBtn.addEventListener('click', () => {
@@ -678,32 +985,6 @@
       });
     };
 
-    function setHint(showHint) {
-      config.showEmojiHint = showHint;
-      const hintOnBtn = document.getElementById('hint-on');
-      const hintOffBtn = document.getElementById('hint-off');
-      if (showHint) {
-        hintOnBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md";
-        hintOffBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400";
-      } else {
-        hintOnBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-stone-950 border-stone-800 text-stone-400";
-        hintOffBtn.className = "hint-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex items-center justify-center gap-1.5 bg-amber-950/40 border-amber-500 text-amber-200 shadow-md";
-      }
-    }
-
-    function setMode(mode) {
-      config.mode = mode;
-      if (mode === 'solo') {
-        modeSoloBtn.className = "mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-amber-950/40 border-amber-500 text-amber-200 shadow-md"
-        modeVsBtn.className = "mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-stone-950 border-stone-800 text-stone-400 hover:border-amber-900 hover:text-amber-300";
-        cpuLevelWrapper.classList.add('hidden');
-      } else {
-        modeSoloBtn.className = "mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-stone-950 border-stone-800 text-stone-400 hover:border-amber-900 hover:text-amber-300";
-        modeVsBtn.className = "mode-select-btn py-2 px-3 rounded-xl text-center border-2 font-bold text-sm transition-all flex flex-col items-center justify-center bg-amber-950/40 border-amber-500 text-amber-200 shadow-md"
-        cpuLevelWrapper.classList.remove('hidden');
-      }
-    }
-
     function handleStartClick() {
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
@@ -711,51 +992,36 @@
         dummyUtterance.volume = 0;
         speechSynthesis.speak(dummyUtterance);
       }
-      
       sound.init();
       if (sound.ctx && sound.ctx.state === 'suspended') {
         sound.ctx.resume();
       }
-
       initGame();
     }
 
-    // --- 読み上げ用関数 (Web Speech API) ---
+    // ===== 読み上げ (Web Speech API) =====
     function speakText(card) {
       if ('speechSynthesis' in window) {
-        speechSynthesis.cancel(); 
-        
+        speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(card.phrase);
         utterance.lang = 'ja-JP';
-        utterance.rate = config.speed; 
-        utterance.pitch = 1.15; 
+        utterance.rate = config.speed;
+        utterance.pitch = 1.15;
         utterance.muted = !config.soundOn;
 
         const voices = speechSynthesis.getVoices();
         const jaVoice = voices.find(v => v.lang.startsWith('ja'));
-        if (jaVoice) {
-          utterance.voice = jaVoice;
-        }
+        if (jaVoice) utterance.voice = jaVoice;
 
         const speakerBadge = document.getElementById('reader-speaker-badge');
-        
-        utterance.onstart = function() {
-          if (speakerBadge) speakerBadge.classList.add('ripple-effect');
-        };
-        
-        utterance.onend = function() {
-          if (speakerBadge) speakerBadge.classList.remove('ripple-effect');
-        };
-        
-        utterance.onerror = function() {
-          if (speakerBadge) speakerBadge.classList.remove('ripple-effect');
-        };
-
+        utterance.onstart = () => { if (speakerBadge) speakerBadge.classList.add('ripple-effect'); };
+        utterance.onend   = () => { if (speakerBadge) speakerBadge.classList.remove('ripple-effect'); };
+        utterance.onerror = () => { if (speakerBadge) speakerBadge.classList.remove('ripple-effect'); };
         speechSynthesis.speak(utterance);
       }
     }
 
-    // --- ゲームコアシステム ---
+    // ===== ゲームコアシステム =====
 
     function initGame() {
       if (mainHeader) mainHeader.classList.add('hidden');
@@ -769,9 +1035,9 @@
       state.missCount = 0;
       state.isPlaying = true;
       state.isInputLocked = false;
-      
+
       state.timeLeft = getLimitTime(config.size);
-      
+
       playerScoreEl.textContent = '0';
       cpuScoreEl.textContent = '0';
       timerValEl.textContent = state.timeLeft.toString() + 'びょう';
@@ -779,20 +1045,15 @@
 
       const cpuStatusArea = document.getElementById('cpu-status-area');
       if (config.mode === 'vs') {
-        if(cpuStatusArea) cpuStatusArea.classList.remove('hidden');
-        if (config.cpuLevel === 'easy') {
-          document.getElementById('cpu-avatar').textContent = '🐰';
-        } else if (config.cpuLevel === 'medium') {
-          document.getElementById('cpu-avatar').textContent = '🦊';
-        } else if (config.cpuLevel === 'hard') {
-          document.getElementById('cpu-avatar').textContent = '🐉';
-        } else {
-          document.getElementById('cpu-avatar').textContent = '👹';
-        }
+        if (cpuStatusArea) cpuStatusArea.classList.remove('hidden');
+        const avatarMap = { easy: '🐰', medium: '🦊', hard: '🐉', expert: '👹' };
+        document.getElementById('cpu-avatar').textContent = avatarMap[config.cpuLevel] || '🐰';
       } else {
-        if(cpuStatusArea) cpuStatusArea.classList.add('hidden');
+        if (cpuStatusArea) cpuStatusArea.classList.add('hidden');
       }
 
+      // カルタデータ取得＆シャッフル
+      const allKaruta = getCurrentKarutaData();
       const shuffledAll = [...allKaruta].sort(() => Math.random() - 0.5);
       state.boardCards = shuffledAll.slice(0, config.size);
       state.remainingCards = [...state.boardCards];
@@ -822,46 +1083,40 @@
 
     function renderBoard() {
       karutaBoard.innerHTML = '';
-      
       const displayCards = [...state.boardCards].sort(() => Math.random() - 0.5);
 
       let gridCols = "grid-cols-3";
-      let fontSizeClass = "text-5xl sm:text-6xl md:text-7xl lg:text-8xl"; 
-      let cardHeightClass = "max-h-[22vh] md:max-h-[25vh]"; 
-      let emojiSizeClass = "text-3xl sm:text-4xl md:text-5xl";
-      
+      let fontSizeClass = "text-5xl sm:text-6xl md:text-7xl lg:text-8xl";
+      let cardHeightClass = "max-h-[22vh] md:max-h-[25vh]";
+
+      // ようおんは2文字なので文字を小さめに
+      const isYouon = config.soundType === 'youon';
+
       if (config.size === 16) {
         gridCols = "grid-cols-4";
-        fontSizeClass = "text-4xl sm:text-5xl md:text-5.5xl lg:text-6.5xl"; 
+        fontSizeClass = isYouon ? "text-2xl sm:text-3xl md:text-4xl" : "text-4xl sm:text-5xl md:text-6xl";
         cardHeightClass = "max-h-[15vh] md:max-h-[17vh]";
-        emojiSizeClass = "text-2.5xl sm:text-3.5xl md:text-4.5xl";
       } else if (config.size === 25) {
         gridCols = "grid-cols-5";
-        fontSizeClass = "text-3xl sm:text-4xl md:text-5xl lg:text-6xl"; 
+        fontSizeClass = isYouon ? "text-xl sm:text-2xl md:text-3xl" : "text-3xl sm:text-4xl md:text-5xl";
         cardHeightClass = "max-h-[11vh] md:max-h-[12.5vh]";
-        emojiSizeClass = "text-2xl sm:text-3xl md:text-4xl";
+      } else {
+        // 9枚
+        fontSizeClass = isYouon ? "text-3xl sm:text-4xl md:text-5xl" : "text-5xl sm:text-6xl md:text-7xl";
       }
-      
+
       karutaBoard.className = `grid ${gridCols} gap-2.5 sm:gap-3.5 md:gap-4 w-full h-full max-h-[85vh] md:max-h-[92vh] max-w-4xl`;
 
       displayCards.forEach(card => {
         const cardBtn = document.createElement('button');
-        cardBtn.id = `card-${card.char}`;
-        
-        // カードの比率をかるた札らしく aspect-[3/4] に設定し、和紙グラデーションと金枠風ボーダーを適用
-        cardBtn.className = `karuta-card bg-gradient-to-br from-amber-50 to-orange-50/40 hover:from-amber-100/90 hover:to-orange-100/60 rounded-2xl text-stone-900 flex flex-col items-center justify-between p-3 border-3 md:border-4 border-amber-700/35 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
-        
-        let emojiHtml = '';
-        if (config.showEmojiHint) {
-          emojiHtml = `<span class="${emojiSizeClass} leading-none mb-1 opacity-90 select-none filter drop-shadow">${card.emoji}</span>`;
-        }
+        cardBtn.id = `card-${CSS.escape(card.char)}`;
 
+        cardBtn.className = `karuta-card bg-gradient-to-br from-amber-50 to-orange-50/40 hover:from-amber-100/90 hover:to-orange-100/60 rounded-2xl text-stone-900 flex flex-col items-center justify-center p-2 border-3 md:border-4 border-amber-700/35 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
+
+        // 絵は表示しない（Ver 1.0仕様）
         cardBtn.innerHTML = `
           <div class="absolute inset-1.5 border border-amber-700/10 rounded-xl pointer-events-none"></div>
-          <div class="flex-grow flex items-center justify-center">
-            <span class="${fontSizeClass} font-black text-stone-850 font-klee select-none leading-none">${card.char}</span>
-          </div>
-          ${emojiHtml}
+          <span class="${fontSizeClass} font-black text-stone-850 font-klee select-none leading-tight text-center">${card.char}</span>
         `;
 
         cardBtn.addEventListener('click', () => handleCardTap(card));
@@ -869,11 +1124,14 @@
       });
     }
 
+    function getCardEl(card) {
+      return document.getElementById(`card-${CSS.escape(card.char)}`);
+    }
+
     function handleCardTap(card) {
       if (!state.isPlaying || state.isInputLocked) return;
-
-      const cardEl = document.getElementById(`card-${card.char}`);
-      if (cardEl.classList.contains('taken')) return;
+      const cardEl = getCardEl(card);
+      if (!cardEl || cardEl.classList.contains('taken')) return;
 
       if (card.char === state.currentCard.char) {
         playerGetCard(card);
@@ -884,11 +1142,9 @@
 
     function playerGetCard(card) {
       if (state.cpuActionTimeout) clearTimeout(state.cpuActionTimeout);
-
       sound.playCorrect();
       state.playerScore++;
       playerScoreEl.textContent = state.playerScore;
-
       markCardAsTaken(card, 'player');
     }
 
@@ -896,35 +1152,53 @@
       sound.playCpuGet();
       state.cpuScore++;
       cpuScoreEl.textContent = state.cpuScore;
-
+      showCpuHand(card);
       markCardAsTaken(card, 'cpu');
     }
 
+    // 相手の手アニメーション
+    function showCpuHand(card) {
+      const cardEl = getCardEl(card);
+      if (!cardEl) return;
+
+      const rect = cardEl.getBoundingClientRect();
+      const handX = rect.left + rect.width / 2 - 24; // 中央寄せ（文字サイズ考慮）
+      cpuHandEl.style.left = handX + 'px';
+      cpuHandEl.style.top  = '0px';
+
+      cpuHandEl.classList.remove('active');
+      // リフロー強制
+      void cpuHandEl.offsetWidth;
+      cpuHandEl.classList.add('active');
+
+      // アニメーション終了後に非表示
+      setTimeout(() => cpuHandEl.classList.remove('active'), 950);
+    }
+
     function markCardAsTaken(card, winner) {
-      const cardEl = document.getElementById(`card-${card.char}`);
+      const cardEl = getCardEl(card);
       if (!cardEl) return;
 
       cardEl.classList.add('taken', 'opacity-20');
       cardEl.classList.remove('cpu-targeting');
-      
       cardEl.style.transform = 'scale(0.85) rotate(' + (Math.random() * 24 - 12) + 'deg)';
-      
+
       if (winner === 'player') {
-        cardEl.className += " border-amber-500 bg-amber-200/50";
+        cardEl.classList.add('border-amber-500', 'bg-amber-200/50');
         const badge = document.createElement('div');
         badge.className = "absolute inset-0 flex items-center justify-center z-10 pointer-events-none";
         badge.innerHTML = `<span class="bg-amber-500 text-stone-900 text-base font-black px-2 py-0.5 rounded shadow">〇</span>`;
         cardEl.appendChild(badge);
         createConfettiAtElement(cardEl);
       } else {
-        cardEl.className += " border-rose-500 bg-rose-200/30";
+        cardEl.classList.add('border-rose-500', 'bg-rose-200/30');
         const badge = document.createElement('div');
         badge.className = "absolute inset-0 flex items-center justify-center z-10 pointer-events-none";
-        badge.innerHTML = `<span class="bg-rose-500 text-white text-base font-black px-2 py-0.5 rounded shadow">${document.getElementById('cpu-avatar').textContent}</span>`;
+        const avatarEl = document.getElementById('cpu-avatar');
+        badge.innerHTML = `<span class="bg-rose-500 text-white text-base font-black px-2 py-0.5 rounded shadow">${avatarEl ? avatarEl.textContent : '👹'}</span>`;
         cardEl.appendChild(badge);
-        // CPUのアバターを少し揺らす
         const avatarContainer = document.getElementById('cpu-avatar-container');
-        if(avatarContainer) {
+        if (avatarContainer) {
           avatarContainer.classList.add('animate-shake', 'bg-rose-900');
           setTimeout(() => avatarContainer.classList.remove('animate-shake', 'bg-rose-900'), 500);
         }
@@ -936,7 +1210,7 @@
       if (state.remainingCards.length === 0) {
         setTimeout(() => finishGame(false), 850);
       } else {
-        setTimeout(nextTurn, 1400); 
+        setTimeout(nextTurn, 1400);
       }
     }
 
@@ -945,23 +1219,22 @@
       state.missCount++;
       state.isInputLocked = true;
 
-      cardEl.classList.add('border-rose-650', 'bg-rose-100', 'animate-shake');
-      
-      // お手付き時に画面全体を赤くフラッシュ
-      const gameScreen = document.getElementById('screen-game');
-      if (gameScreen) {
-        gameScreen.classList.add('animate-flash-red');
-        setTimeout(() => gameScreen.classList.remove('animate-flash-red'), 500);
+      cardEl.classList.add('border-rose-500', 'bg-rose-100', 'animate-shake');
+
+      const gs = document.getElementById('screen-game');
+      if (gs) {
+        gs.classList.add('animate-flash-red');
+        setTimeout(() => gs.classList.remove('animate-flash-red'), 500);
       }
-      
+
       const gameTip = document.getElementById('game-tip');
       gameTip.className = "text-rose-400 font-bold animate-pulse text-sm text-center";
       gameTip.textContent = "⚠️ まちがい！ すこし うごけません";
 
       setTimeout(() => {
-        cardEl.classList.remove('border-rose-650', 'bg-rose-100', 'animate-shake');
+        cardEl.classList.remove('border-rose-500', 'bg-rose-100', 'animate-shake');
         gameTip.className = "text-stone-300 font-bold text-xs text-center";
-        gameTip.textContent = "💡 こえを よく きいて、ただしい ひらがなを タッチしよう！";
+        gameTip.textContent = "💡 こえを よく きいて、ただしいもじを タッチしよう！";
         state.isInputLocked = false;
       }, 1000);
     }
@@ -974,15 +1247,16 @@
 
       const phrase = state.currentCard.phrase;
       const targetChar = state.currentCard.char;
+      // ようおん（2文字）は lastIndexOf では見つからないため substring で検索
       const charIndex = phrase.lastIndexOf(targetChar);
       if (charIndex !== -1) {
         const before = phrase.substring(0, charIndex);
-        const after = phrase.substring(charIndex + 1);
+        const after  = phrase.substring(charIndex + targetChar.length);
         currentReadPhraseEl.innerHTML = `${before}<span class="text-rose-600 text-[1.25em] bg-rose-100/50 rounded-lg px-1 border-b-4 border-rose-500">${targetChar}</span>${after}`;
       } else {
         currentReadPhraseEl.textContent = phrase;
       }
-      
+
       const speakerBadge = document.getElementById('reader-speaker-badge');
       speakerBadge.classList.add('scale-110');
       setTimeout(() => speakerBadge.classList.remove('scale-110'), 400);
@@ -997,34 +1271,36 @@
     function scheduleCpuAction() {
       if (state.cpuActionTimeout) clearTimeout(state.cpuActionTimeout);
 
-      let baseDelay = 11.0; 
+      // "はやい" の baseDelay = 4.5秒。"げきむず" = 4.5 - 1 = 3.5秒
+      let baseDelay = 11.0;
       let variation = 4.0;
 
       if (config.cpuLevel === 'medium') {
-        baseDelay = 7.5; 
+        baseDelay = 7.5;
         variation = 3.0;
       } else if (config.cpuLevel === 'hard') {
-        baseDelay = 4.5; 
+        baseDelay = 4.5;
         variation = 2.0;
       } else if (config.cpuLevel === 'expert') {
-        baseDelay = 2.0;
-        variation = 0.8;
+        baseDelay = 3.5;   // "はやい"(4.5) より1秒短い
+        variation = 1.0;
       }
 
       // 残り枚数に応じた加速
       const progressRatio = state.remainingCards.length / config.size;
-      let speedMultiplier = 0.5 + (0.5 * progressRatio); // 後半になるほど 1.0 -> 0.5 に近づく
-      if(config.cpuLevel === 'expert') {
-        speedMultiplier = 0.4 + (0.6 * progressRatio); // expertはさらに加速
+      let speedMultiplier = 0.5 + (0.5 * progressRatio);
+      if (config.cpuLevel === 'expert') {
+        speedMultiplier = 0.4 + (0.6 * progressRatio);
       }
 
-      const actualDelay = (baseDelay + (Math.random() * variation - (variation / 2))) * 1000 * speedMultiplier;
+      const actualDelay = (baseDelay + (Math.random() * variation - variation / 2)) * 1000 * speedMultiplier;
       const targetCardChar = state.currentCard.char;
-      const cardEl = document.getElementById(`card-${targetCardChar}`);
+      const cardEl = getCardEl(state.currentCard);
 
+      // ターゲット点滅
       setTimeout(() => {
         if (state.isPlaying && state.currentCard && state.currentCard.char === targetCardChar) {
-          cardEl.classList.add('cpu-targeting');
+          if (cardEl) cardEl.classList.add('cpu-targeting');
         }
       }, Math.max(100, actualDelay - 1500));
 
@@ -1039,9 +1315,7 @@
       state.isPlaying = false;
       if (state.timerInterval) clearInterval(state.timerInterval);
       if (state.cpuActionTimeout) clearTimeout(state.cpuActionTimeout);
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-      }
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
 
       if (mainHeader) mainHeader.classList.remove('hidden');
 
@@ -1097,12 +1371,9 @@
       state.isPlaying = false;
       if (state.timerInterval) clearInterval(state.timerInterval);
       if (state.cpuActionTimeout) clearTimeout(state.cpuActionTimeout);
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-      }
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
 
       if (mainHeader) mainHeader.classList.remove('hidden');
-
       gameScreen.classList.add('hidden');
       startScreen.classList.remove('hidden');
     }
@@ -1111,14 +1382,12 @@
       const container = document.getElementById('confetti-container');
       const rect = el.getBoundingClientRect();
       const colors = ['#f59e0b', '#fbbf24', '#fef08a', '#10b981', '#3b82f6', '#ec4899'];
-
       for (let i = 0; i < 15; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         confetti.style.left = (rect.left + rect.width / 2 + (Math.random() * 60 - 30)) + 'px';
-        confetti.style.top = (rect.top + rect.height / 2 + (Math.random() * 40 - 20)) + 'px';
-        confetti.style.animationName = 'confetti-fall';
+        confetti.style.top  = (rect.top + rect.height / 2 + (Math.random() * 40 - 20)) + 'px';
         confetti.style.animationDuration = (1 + Math.random() * 1.5) + 's';
         container.appendChild(confetti);
         setTimeout(() => confetti.remove(), 2500);
@@ -1128,15 +1397,14 @@
     function triggerMegaConfetti() {
       const container = document.getElementById('confetti-container');
       const colors = ['#f59e0b', '#fbbf24', '#fef08a', '#10b981', '#3b82f6', '#ec4899'];
-
       for (let i = 0; i < 60; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         confetti.style.left = (Math.random() * 100) + 'vw';
-        confetti.style.top = '-20px';
+        confetti.style.top  = '-20px';
         confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
-        confetti.style.animationDelay = (Math.random() * 1.5) + 's';
+        confetti.style.animationDelay    = (Math.random() * 1.5) + 's';
         container.appendChild(confetti);
         setTimeout(() => confetti.remove(), 4500);
       }
