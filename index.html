@@ -8,9 +8,14 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap');
     
     .font-ud-gothic {
       font-family: "BIZ UDGothic", "UD Digi Kyokasho N-R", "Hiragino Sans", "Hiragino Kaku Gothic ProN", -apple-system, BlinkMacSystemFont, "Meiryo", sans-serif;
+    }
+    
+    .font-klee {
+      font-family: "Klee One", "UD Digi Kyokasho N-R", "BIZ UDGothic", sans-serif;
     }
     
     .tatami-bg {
@@ -173,7 +178,7 @@
             <label class="block text-sm font-bold text-amber-300 mb-1.5 tracking-wider flex items-center gap-1.5">
               <i data-lucide="bot" class="w-4 h-4"></i> あいての つよさ
             </label>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
               <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-amber-950/40 border-amber-600 text-amber-200" data-level="easy">
                 <span class="block text-xl mb-0.5">🐰</span>
                 ゆっくり
@@ -185,6 +190,10 @@
               <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-level="hard">
                 <span class="block text-xl mb-0.5">🐉</span>
                 はやい
+              </button>
+              <button class="cpu-select-btn p-2 rounded-lg border-2 text-center transition-all text-sm font-bold bg-stone-950 border-stone-800 text-stone-400" data-level="expert">
+                <span class="block text-xl mb-0.5">👹</span>
+                げきむず
               </button>
             </div>
           </div>
@@ -249,71 +258,78 @@
     </section>
 
     <!-- 2. ゲーム本番画面 -->
-    <section id="screen-game" class="flex-grow h-full flex flex-col md:flex-row hidden tatami-bg overflow-hidden">
+    <section id="screen-game" class="flex-grow h-full flex flex-col hidden tatami-bg overflow-hidden">
       
-      <!-- 左コントロールパネル (文字を大きくするため幅を少し広めに設定) -->
-      <div class="bg-stone-900/95 md:w-80 w-full flex-shrink-0 border-b md:border-b-0 md:border-r border-amber-900/40 p-3 md:p-5 flex flex-col justify-between gap-3 md:h-full z-10 shadow-lg overflow-y-auto">
-        
-        <div class="space-y-4">
-          <!-- スコア＆タイマー -->
-          <div class="grid grid-cols-2 md:grid-cols-1 gap-3">
-            <div class="flex items-center justify-between bg-stone-950/60 px-3 py-2 rounded-xl border border-white/5">
-              <span class="text-base text-stone-400 font-bold font-ud-gothic">じぶん</span>
-              <span class="text-base font-bold text-amber-300 font-ud-gothic"><span id="player-score" class="text-2xl">0</span> まい</span>
-            </div>
-            <div id="cpu-status" class="flex items-center justify-between bg-stone-950/60 px-3 py-2 rounded-xl border border-white/5 transition-all">
-              <span class="text-base text-stone-400 flex items-center gap-1 font-bold font-ud-gothic"><span id="cpu-avatar">🐰</span> あいて</span>
-              <span class="text-base font-bold text-rose-400 font-ud-gothic"><span id="cpu-score" class="text-2xl">0</span> まい</span>
-            </div>
+      <!-- 上部: 相手エリア -->
+      <div id="cpu-status-area" class="bg-stone-900/90 border-b-2 border-amber-900/40 px-4 py-2 flex justify-between items-center shadow-md z-10 hidden">
+        <div class="flex items-center gap-3">
+          <div id="cpu-avatar-container" class="w-12 h-12 bg-stone-800 rounded-full flex items-center justify-center text-3xl border-2 border-rose-500 shadow-sm transition-transform">
+            <span id="cpu-avatar">🐰</span>
           </div>
+          <div class="flex flex-col">
+            <span class="text-xs text-stone-400 font-bold font-ud-gothic">あいて</span>
+            <span class="text-xl font-bold text-rose-400 font-ud-gothic leading-none"><span id="cpu-score">0</span> まい</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <span class="text-xs text-stone-400 font-bold block font-ud-gothic">のこり</span>
+            <span id="remaining-count" class="font-bold text-white text-lg font-ud-gothic">16まい</span>
+          </div>
+        </div>
+      </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-1 gap-3">
-            <div class="flex items-center justify-between bg-stone-950/30 px-3 py-1.5 rounded-lg">
-              <span class="text-sm text-stone-400 font-bold font-ud-gothic">のこり</span>
-              <span id="remaining-count" class="font-bold text-white text-lg font-ud-gothic">16まい</span>
+      <!-- 中央: かるたボードエリア -->
+      <div class="flex-grow w-full p-2 md:p-4 lg:p-6 flex items-center justify-center overflow-hidden">
+        <div id="karuta-board" class="grid gap-2.5 sm:gap-3.5 w-full h-full max-h-full max-w-5xl justify-center content-center font-klee">
+          <!-- JSで設定枚数のカードを動的に配置 -->
+        </div>
+      </div>
+
+      <!-- 下部: 自分エリア ＆ 読み札表示 -->
+      <div class="bg-stone-900/95 border-t-2 border-amber-900/40 p-3 md:p-4 z-10 shadow-lg">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+          
+          <!-- 左: 自分のスコア＆タイマー -->
+          <div class="flex md:flex-col gap-4 md:gap-2 w-full md:w-auto justify-center">
+            <div class="flex items-center justify-between gap-3 bg-stone-950/60 px-4 py-2 rounded-xl border border-white/5">
+              <span class="text-sm text-stone-400 font-bold font-ud-gothic">じぶん</span>
+              <span class="text-lg font-bold text-amber-300 font-ud-gothic"><span id="player-score" class="text-2xl">0</span> まい</span>
             </div>
-            <div class="flex items-center justify-between bg-stone-950/30 px-3 py-1.5 rounded-lg">
+            <div class="flex items-center justify-between gap-3 bg-stone-950/60 px-4 py-2 rounded-xl border border-white/5">
               <span class="text-sm text-stone-400 font-bold font-ud-gothic">じかん</span>
               <span id="timer-val" class="font-bold text-emerald-400 transition-colors text-xl font-ud-gothic">80.0</span>
             </div>
           </div>
-        </div>
 
-        <!-- 読み札表示エリア (文字をかなり大きく見やすく) -->
-        <div class="bg-amber-50 text-stone-900 border-4 border-amber-800 rounded-2xl p-4 shadow-xl relative overflow-hidden flex-grow md:flex-grow-0 my-2 flex flex-col justify-center min-h-[140px] md:min-h-[180px]">
-          <div class="absolute inset-0.5 border-2 border-amber-800/10 rounded-xl pointer-events-none"></div>
-
-          <div class="flex items-center justify-center space-x-2 z-10 mb-2">
-            <div class="bg-amber-800 text-amber-100 p-1.5 rounded-lg shadow animate-pulse flex-shrink-0" id="reader-speaker-badge">
-              <i data-lucide="volume-2" class="w-5 h-5"></i>
+          <!-- 中央: 読み札表示エリア (文字をかなり大きく見やすく) -->
+          <div class="bg-amber-50 text-stone-900 border-4 border-amber-800 rounded-2xl py-3 px-6 shadow-xl relative overflow-hidden flex-grow w-full md:w-auto flex flex-col justify-center">
+            <div class="absolute inset-0.5 border-2 border-amber-800/10 rounded-xl pointer-events-none"></div>
+            <div class="flex items-center justify-center space-x-2 z-10 mb-1">
+              <div class="bg-amber-800 text-amber-100 p-1.5 rounded-lg shadow animate-pulse flex-shrink-0" id="reader-speaker-badge">
+                <i data-lucide="volume-2" class="w-4 h-4"></i>
+              </div>
+              <span class="text-xs text-amber-800 font-black tracking-wider bg-amber-200/50 px-2 py-0.5 rounded font-ud-gothic">よみあげ</span>
             </div>
-            <span class="text-sm text-amber-800 font-black tracking-wider bg-amber-200/50 px-2 py-0.5 rounded font-ud-gothic">よみあげ</span>
+            
+            <h3 id="current-read-phrase" class="text-2xl md:text-3xl lg:text-4xl font-black tracking-wider text-stone-800 font-klee min-h-[3rem] flex items-center justify-center text-center leading-tight py-2">
+              （まってね）
+            </h3>
           </div>
-          
-          <h3 id="current-read-phrase" class="text-2xl md:text-3xl font-black tracking-wider text-stone-800 font-ud-gothic mb-4 min-h-[4rem] flex items-center justify-center text-center leading-tight">
-            （まってね）
-          </h3>
 
-          <button id="replay-btn" class="z-10 bg-amber-800 hover:bg-amber-900 text-white py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm md:text-base font-bold w-full font-ud-gothic">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-            <span>もういっかい きく</span>
-          </button>
+          <!-- 右: コントロールボタン -->
+          <div class="flex md:flex-col gap-3 w-full md:w-auto justify-center">
+            <button id="replay-btn" class="flex-1 md:flex-none bg-amber-800 hover:bg-amber-900 text-white py-3 md:py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm font-bold font-ud-gothic">
+              <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+              <span>もういっかい</span>
+            </button>
+            <button id="abandon-btn" class="flex-1 md:flex-none bg-stone-800 hover:bg-stone-700 text-stone-200 py-3 md:py-2.5 px-4 rounded-xl transition-colors border border-stone-700 font-bold font-ud-gothic text-sm">
+              やめる
+            </button>
+          </div>
+
         </div>
-
-        <div class="space-y-3">
-          <p id="game-tip" class="text-xs text-stone-300 leading-tight font-bold hidden md:block text-center">💡 こえを よく きいて、ただしい ひらがなを タッチしよう！</p>
-          <button id="abandon-btn" class="w-full bg-stone-800 hover:bg-stone-700 text-stone-200 py-2.5 rounded-xl transition-colors border border-stone-700 font-bold font-ud-gothic text-base">
-            やめる
-          </button>
-        </div>
-
-      </div>
-
-      <!-- 右側かるたボードエリア -->
-      <div class="flex-grow h-full p-2 md:p-4 lg:p-6 flex items-center justify-center overflow-hidden">
-        <div id="karuta-board" class="grid gap-2.5 sm:gap-3.5 md:gap-4 w-full h-full max-h-full max-w-full justify-center content-center font-ud-gothic">
-          <!-- JSで設定枚数のカードを動的に配置 -->
-        </div>
+        <p id="game-tip" class="text-xs text-stone-300 leading-tight font-bold mt-2 text-center">💡 こえを よく きいて、ただしい ひらがなを タッチしよう！</p>
       </div>
 
     </section>
@@ -761,17 +777,20 @@
       timerValEl.textContent = state.timeLeft.toString() + 'びょう';
       timerValEl.className = "font-bold text-emerald-400 transition-colors text-xl font-ud-gothic";
 
+      const cpuStatusArea = document.getElementById('cpu-status-area');
       if (config.mode === 'vs') {
-        cpuStatusEl.classList.remove('opacity-0', 'pointer-events-none');
+        if(cpuStatusArea) cpuStatusArea.classList.remove('hidden');
         if (config.cpuLevel === 'easy') {
           document.getElementById('cpu-avatar').textContent = '🐰';
         } else if (config.cpuLevel === 'medium') {
           document.getElementById('cpu-avatar').textContent = '🦊';
-        } else {
+        } else if (config.cpuLevel === 'hard') {
           document.getElementById('cpu-avatar').textContent = '🐉';
+        } else {
+          document.getElementById('cpu-avatar').textContent = '👹';
         }
       } else {
-        cpuStatusEl.classList.add('opacity-0', 'pointer-events-none');
+        if(cpuStatusArea) cpuStatusArea.classList.add('hidden');
       }
 
       const shuffledAll = [...allKaruta].sort(() => Math.random() - 0.5);
@@ -840,7 +859,7 @@
         cardBtn.innerHTML = `
           <div class="absolute inset-1.5 border border-amber-700/10 rounded-xl pointer-events-none"></div>
           <div class="flex-grow flex items-center justify-center">
-            <span class="${fontSizeClass} font-black text-stone-850 font-ud-gothic select-none leading-none">${card.char}</span>
+            <span class="${fontSizeClass} font-black text-stone-850 font-klee select-none leading-none">${card.char}</span>
           </div>
           ${emojiHtml}
         `;
@@ -903,6 +922,12 @@
         badge.className = "absolute inset-0 flex items-center justify-center z-10 pointer-events-none";
         badge.innerHTML = `<span class="bg-rose-500 text-white text-base font-black px-2 py-0.5 rounded shadow">${document.getElementById('cpu-avatar').textContent}</span>`;
         cardEl.appendChild(badge);
+        // CPUのアバターを少し揺らす
+        const avatarContainer = document.getElementById('cpu-avatar-container');
+        if(avatarContainer) {
+          avatarContainer.classList.add('animate-shake', 'bg-rose-900');
+          setTimeout(() => avatarContainer.classList.remove('animate-shake', 'bg-rose-900'), 500);
+        }
       }
 
       state.remainingCards = state.remainingCards.filter(c => c.char !== card.char);
@@ -947,7 +972,16 @@
       const randomIndex = Math.floor(Math.random() * state.remainingCards.length);
       state.currentCard = state.remainingCards[randomIndex];
 
-      currentReadPhraseEl.textContent = state.currentCard.phrase;
+      const phrase = state.currentCard.phrase;
+      const targetChar = state.currentCard.char;
+      const charIndex = phrase.lastIndexOf(targetChar);
+      if (charIndex !== -1) {
+        const before = phrase.substring(0, charIndex);
+        const after = phrase.substring(charIndex + 1);
+        currentReadPhraseEl.innerHTML = `${before}<span class="text-rose-600 text-[1.25em] bg-rose-100/50 rounded-lg px-1 border-b-4 border-rose-500">${targetChar}</span>${after}`;
+      } else {
+        currentReadPhraseEl.textContent = phrase;
+      }
       
       const speakerBadge = document.getElementById('reader-speaker-badge');
       speakerBadge.classList.add('scale-110');
@@ -972,9 +1006,19 @@
       } else if (config.cpuLevel === 'hard') {
         baseDelay = 4.5; 
         variation = 2.0;
+      } else if (config.cpuLevel === 'expert') {
+        baseDelay = 2.0;
+        variation = 0.8;
       }
 
-      const actualDelay = (baseDelay + (Math.random() * variation - (variation / 2))) * 1000;
+      // 残り枚数に応じた加速
+      const progressRatio = state.remainingCards.length / config.size;
+      let speedMultiplier = 0.5 + (0.5 * progressRatio); // 後半になるほど 1.0 -> 0.5 に近づく
+      if(config.cpuLevel === 'expert') {
+        speedMultiplier = 0.4 + (0.6 * progressRatio); // expertはさらに加速
+      }
+
+      const actualDelay = (baseDelay + (Math.random() * variation - (variation / 2))) * 1000 * speedMultiplier;
       const targetCardChar = state.currentCard.char;
       const cardEl = document.getElementById(`card-${targetCardChar}`);
 
