@@ -315,7 +315,7 @@
             <div class="grid grid-cols-3 gap-2">
               <button id="btn-size-9"  class="opt-btn inactive text-sm" onclick="selectSize(9)">9まい</button>
               <button id="btn-size-16" class="opt-btn active text-sm"   onclick="selectSize(16)">16まい</button>
-              <button id="btn-size-25" class="opt-btn inactive text-sm" onclick="selectSize(25)">25まい</button>
+              <button id="btn-size-24" class="opt-btn inactive text-sm" onclick="selectSize(24)">24まい</button>
             </div>
           </div>
 
@@ -422,6 +422,13 @@
         <h2 id="result-title" class="text-2xl md:text-3xl font-black text-orange-500 tracking-wider mb-2 font-ud-gothic">おしまい！</h2>
         <p id="result-subtitle" class="text-base text-slate-600 font-bold mb-5 font-ud-gothic">ぜんぶ とれたね！</p>
 
+        <div class="mb-5 bg-gradient-to-b from-orange-50 to-orange-100 rounded-2xl py-3 md:py-4 border-2 border-orange-200 shadow-inner">
+          <div class="text-orange-600 font-bold text-sm md:text-base mb-1 font-ud-gothic tracking-widest flex items-center justify-center gap-1">
+            <i data-lucide="sparkles" class="w-4 h-4 text-orange-400"></i> ごうけいスコア <i data-lucide="sparkles" class="w-4 h-4 text-orange-400"></i>
+          </div>
+          <div class="text-4xl md:text-5xl font-black text-orange-500 font-ud-gothic drop-shadow-sm"><span id="res-total-score">0</span><span class="text-xl md:text-2xl ml-1">てん</span></div>
+        </div>
+
         <div class="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6 text-left space-y-3 text-sm md:text-base font-bold text-slate-600">
           <div class="flex justify-between items-center pb-2 border-b border-orange-200/50">
             <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="user" class="w-5 h-5 text-orange-500"></i> じぶんが とった かず</span>
@@ -524,7 +531,7 @@
       { char: 'ど', phrase: 'どんぐりの、ど！' }, { char: 'ば', phrase: 'ばななの、ば！' },
       { char: 'び', phrase: 'えびの、び！' }, { char: 'ぶ', phrase: 'ぶどうの、ぶ！' },
       { char: 'べ', phrase: 'なべの、べ！' }, { char: 'ぼ', phrase: 'ぼうしの、ぼ！' },
-      { char: 'ぱ', phrase: 'ぱんの、ぱ！' }, { char: 'ぴ', phrase: 'ぴいまんの、ぴ！' },
+      { char: 'ぱ', phrase: 'ぱんの、ぱ！' }, { char: 'ぴ', phrase: 'ぴーまんの、ぴ！' },
       { char: 'ぷ', phrase: 'ぷりんの、ぷ！' }, { char: 'ぺ', phrase: 'ぺんぎんの、ぺ！' },
       { char: 'ぽ', phrase: 'ぽけっとの、ぽ！' }
     ];
@@ -536,16 +543,16 @@
       { char: 'ちゃ', phrase: 'ちゃわんの、ちゃ！' }, { char: 'ちゅ', phrase: 'ちゅうりっぷの、ちゅ！' },
       { char: 'ちょ', phrase: 'ちょうちょの、ちょ！' }, { char: 'にゃ', phrase: 'にゃんこの、にゃ！' },
       { char: 'にゅ', phrase: 'ぎゅうにゅうの、にゅ！' }, { char: 'にょ', phrase: 'にょろにょろの、にょ！' },
-      { char: 'ひゃ', phrase: 'ひゃくの、ひゃ！' }, { char: 'ひゅ', phrase: 'ひゅうんの、ひゅ！' },
+      { char: 'ひゃ', phrase: 'ひゃくの、ひゃ！' }, { char: 'ひゅ', phrase: 'ひゅーんの、ひゅ！' },
       { char: 'ひょ', phrase: 'ひょうの、ひょ！' }, { char: 'みゃ', phrase: 'みゃおの、みゃ！' },
-      { char: 'みゅ', phrase: 'みゅうじっくの、みゅ！' }, { char: 'みょ', phrase: 'みょうがの、みょ！' },
-      { char: 'りゃ', phrase: 'りゃまの、りゃ！' }, { char: 'りゅ', phrase: 'りゅうの、りゅ！' },
+      { char: 'みゅ', phrase: 'ぎゅうにゅうの、みゅ！' }, { char: 'みょ', phrase: 'みょうがの、みょ！' },
+      { char: 'りゃ', phrase: 'りゃまの、りゃ！' }, { char: 'りゅ', phrase: 'きょうりゅうの、りゅ！' },
       { char: 'りょ', phrase: 'りょうりの、りょ！' }, { char: 'ぎゃ', phrase: 'ぎゃくてんの、ぎゃ！' },
-      { char: 'ぎゅ', phrase: 'ぎゅうにくの、ぎゅ！' }, { char: 'ぎょ', phrase: 'きんぎょの、ぎょ！' },
-      { char: 'じゃ', phrase: 'じゃがいもの、じゃ！' }, { char: 'じゅ', phrase: 'じゅうすの、じゅ！' },
+      { char: 'ぎゅ', phrase: 'ぎゅうにゅうの、ぎゅ！' }, { char: 'ぎょ', phrase: 'きんぎょの、ぎょ！' },
+      { char: 'じゃ', phrase: 'じゃがいもの、じゃ！' }, { char: 'じゅ', phrase: 'じゅーすの、じゅ！' },
       { char: 'じょ', phrase: 'じょうろの、じょ！' }, { char: 'びゃ', phrase: 'びゃっこの、びゃ！' },
-      { char: 'びゅ', phrase: 'びゅうんの、びゅ！' }, { char: 'びょ', phrase: 'びょういんの、びょ！' },
-      { char: 'ぴゃ', phrase: 'ろっぴゃくの、ぴゃ！' }, { char: 'ぴゅ', phrase: 'ぴゅうぴゅうの、ぴゅ！' },
+      { char: 'びゅ', phrase: 'びゅーんの、びゅ！' }, { char: 'びょ', phrase: 'びょういんの、びょ！' },
+      { char: 'ぴゃ', phrase: 'ぴゃっの、ぴゃ！' }, { char: 'ぴゅ', phrase: 'ぴゅーの、ぴゅ！' },
       { char: 'ぴょ', phrase: 'ぴょんぴょんの、ぴょ！' }
     ];
 
@@ -604,11 +611,11 @@
       { char: 'ミュ', phrase: 'ミュージックの、ミュ！' }, { char: 'ミョ', phrase: 'ミョウガの、ミョ！' },
       { char: 'リャ', phrase: 'リャマの、リャ！' }, { char: 'リュ', phrase: 'リュックの、リュ！' },
       { char: 'リョ', phrase: 'リョコウの、リョ！' }, { char: 'ギャ', phrase: 'ギャラリーの、ギャ！' },
-      { char: 'ギュ', phrase: 'ギュウニクの、ギュ！' }, { char: 'ギョ', phrase: 'キンギョの、ギョ！' },
+      { char: 'ギュ', phrase: 'ギュウニュウの、ギュ！' }, { char: 'ギョ', phrase: 'キンギョの、ギョ！' },
       { char: 'ジャ', phrase: 'ジャムの、ジャ！' }, { char: 'ジュ', phrase: 'ジュースの、ジュ！' },
       { char: 'ジョ', phrase: 'ジョウロの、ジョ！' }, { char: 'ビャ', phrase: 'ビャクヤの、ビャ！' },
       { char: 'ビュ', phrase: 'ビューンの、ビュ！' }, { char: 'ビョ', phrase: 'ビョウインの、ビョ！' },
-      { char: 'ピャ', phrase: 'ロッピャクの、ピャ！' }, { char: 'ピュ', phrase: 'ピューマの、ピュ！' },
+      { char: 'ピャ', phrase: 'ピャッの、ピャ！' }, { char: 'ピュ', phrase: 'ピューマの、ピュ！' },
       { char: 'ピョ', phrase: 'ピョンピョンの、ピョ！' }
     ];
 
@@ -725,7 +732,7 @@
 
     function selectSize(size) {
       config.size = size;
-      [9,16,25].forEach(s => {
+      [9,16,24].forEach(s => {
         document.getElementById(`btn-size-${s}`).className = s === size ? 'opt-btn active text-sm' : 'opt-btn inactive text-sm';
       });
       updateSummary();
@@ -998,10 +1005,10 @@
         gridCols = "grid-cols-4";
         fontSizeClass = isYouon ? "text-2xl sm:text-3xl md:text-4xl" : "text-4xl sm:text-5xl md:text-6xl";
         cardHeightClass = "max-h-[15vh] md:max-h-[17vh]";
-      } else if (config.size === 25) {
-        gridCols = "grid-cols-5";
+      } else if (config.size === 24) {
+        gridCols = "grid-cols-4 sm:grid-cols-6"; // スマホ縦では4列、タブレットやPC横画面では美しく6列になります
         fontSizeClass = isYouon ? "text-xl sm:text-2xl md:text-3xl" : "text-3xl sm:text-4xl md:text-5xl";
-        cardHeightClass = "max-h-[11vh] md:max-h-[12.5vh]";
+        cardHeightClass = "max-h-[14vh] md:max-h-[16vh]";
       } else {
         fontSizeClass = isYouon ? "text-3xl sm:text-4xl md:text-5xl" : "text-5xl sm:text-6xl md:text-7xl";
       }
@@ -1246,9 +1253,38 @@
         }
       }
 
+      // --- 5歳児向け ポジティブスコア計算 ---
+      let totalScore = 0;
+      const kSize = config.size / 24; // 枚数比例係数 (24枚を1.0とする)
+      let baseMax = 120; // ひとりの時の基本最高目標点
+      
+      if (config.mode === 'vs') {
+        if (config.cpuLevel === 'easy') baseMax = 100;
+        else if (config.cpuLevel === 'medium') baseMax = 200;
+        else if (config.cpuLevel === 'hard') baseMax = 300;
+      }
+
+      // 1. カード獲得点 (配分: 70%)
+      const cardScore = (baseMax * 0.7 / 24) * state.playerScore;
+      
+      // 2. スピードボーナス (配分: 20%)
+      const speedScore = (state.timeLeft / 120) * (baseMax * 0.2 * kSize);
+      
+      // 3. ノーミスボーナス (配分: 10%)
+      let missScore = 0;
+      if (state.missCount === 0) {
+        missScore = baseMax * 0.1 * kSize; // 満額加点
+      } else if (state.missCount <= 2) {
+        missScore = baseMax * 0.05 * kSize; // 半額加点（がんばり賞）
+      }
+
+      totalScore = Math.round(cardScore + speedScore + missScore);
+      // --------------------------------------
+
       document.getElementById('result-status-badge').textContent = badgeEmoji;
       document.getElementById('result-title').textContent = textTitle;
       document.getElementById('result-subtitle').textContent = textSubtitle;
+      document.getElementById('res-total-score').textContent = totalScore;
       document.getElementById('res-player-score').textContent = state.playerScore;
       document.getElementById('res-cpu-score').textContent = state.cpuScore;
       document.getElementById('res-time').textContent = state.timeLeft.toFixed(1);
