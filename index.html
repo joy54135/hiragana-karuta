@@ -46,6 +46,11 @@
       box-shadow: 0 2px 0 #cbd5e1, 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
+    .karuta-card-dynamic {
+      width: var(--card-w, 100%);
+      height: var(--card-h, 100%);
+    }
+
     @keyframes target-pulse {
       0%, 100% { border-color: rgba(244, 63, 94, 0.4); box-shadow: 0 0 0 0px rgba(244, 63, 94, 0.4); }
       50% { border-color: rgba(244, 63, 94, 1); box-shadow: 0 0 16px 6px rgba(244, 63, 94, 0.5); }
@@ -642,7 +647,9 @@
       timeLeft: 0,
       timerInterval: null,
       isInputLocked: false,
-      cpuActionTimeout: null
+      cpuActionTimeout: null,
+      gridR: 0,
+      gridC: 0
     };
 
     const mainHeader = document.getElementById('main-header');
@@ -857,6 +864,10 @@
       updateSummary();
       updateHeaderChar();
 
+      window.addEventListener('resize', () => {
+        if (state.isPlaying) calculateCardSize();
+      });
+
       soundToggleBtn.addEventListener('click', () => {
         config.soundOn = !config.soundOn;
         if (config.soundOn) {
@@ -995,37 +1006,77 @@
       karutaBoard.innerHTML = '';
       const displayCards = [...state.boardCards].sort(() => Math.random() - 0.5);
 
-      let gridCols = "grid-cols-3";
-      let fontSizeClass = "text-5xl sm:text-6xl md:text-7xl lg:text-8xl";
-      let cardHeightClass = "max-h-[22vh] md:max-h-[25vh]";
-
       const isYouon = config.soundType === 'youon';
+      const fontSizeFactor = isYouon ? 0.35 : 0.55; // カード幅に対する文字サイズの比率
 
-      if (config.size === 16) {
-        gridCols = "grid-cols-4";
-        fontSizeClass = isYouon ? "text-2xl sm:text-3xl md:text-4xl" : "text-4xl sm:text-5xl md:text-6xl";
-        cardHeightClass = "max-h-[15vh] md:max-h-[17vh]";
+      // 画面の縦横比を取得して、列数・行数を決定
+      const boardRect = karutaBoard.getBoundingClientRect();
+      const isPortrait = boardRect.height > boardRect.width;
+
+      if (config.size === 9) { 
+        state.gridR = 3; state.gridC = 3; 
+      } else if (config.size === 16) { 
+        state.gridR = 4; state.gridC = 4; 
       } else if (config.size === 24) {
-        gridCols = "grid-cols-4 sm:grid-cols-6"; // スマホ縦では4列、タブレットやPC横画面では美しく6列になります
-        fontSizeClass = isYouon ? "text-xl sm:text-2xl md:text-3xl" : "text-3xl sm:text-4xl md:text-5xl";
-        cardHeightClass = "max-h-[14vh] md:max-h-[16vh]";
-      } else {
-        fontSizeClass = isYouon ? "text-3xl sm:text-4xl md:text-5xl" : "text-5xl sm:text-6xl md:text-7xl";
+        if (isPortrait) {
+          state.gridR = 6; state.gridC = 4; // スマホ等（縦長）
+        } else {
+          state.gridR = 4; state.gridC = 6; // PC・タブレット（横長）
+        }
       }
 
-      karutaBoard.className = `grid ${gridCols} gap-2.5 sm:gap-3.5 md:gap-4 w-full h-full max-h-[85vh] md:max-h-[92vh] max-w-4xl`;
+      karutaBoard.className = `w-full h-full max-h-full max-w-5xl justify-center content-center font-klee`;
+      karutaBoard.style.display = 'grid';
+      karutaBoard.style.placeContent = 'center';
 
       displayCards.forEach(card => {
         const cardBtn = document.createElement('button');
         cardBtn.id = `card-${CSS.escape(card.char)}`;
-        cardBtn.className = `karuta-card bg-white hover:bg-orange-50 rounded-2xl flex flex-col items-center justify-center p-2 border-3 md:border-4 border-slate-200 aspect-[3/4] relative overflow-hidden transition-all ${cardHeightClass}`;
+        cardBtn.className = `karuta-card karuta-card-dynamic bg-white hover:bg-orange-50 rounded-2xl flex flex-col items-center justify-center p-2 border-3 md:border-4 border-slate-200 relative overflow-hidden transition-all`;
         cardBtn.innerHTML = `
           <div class="absolute inset-1.5 border border-slate-100 rounded-xl pointer-events-none"></div>
-          <span class="${fontSizeClass} font-black text-slate-800 font-klee select-none leading-tight text-center">${card.char}</span>
+          <span class="font-black text-slate-800 font-klee select-none leading-tight text-center" style="font-size: calc(var(--card-w) * ${fontSizeFactor})">${card.char}</span>
         `;
         cardBtn.addEventListener('click', () => handleCardTap(card));
         karutaBoard.appendChild(cardBtn);
       });
+
+      // 描画直後にサイズ計算を実行
+      requestAnimationFrame(() => {
+        calculateCardSize();
+      });
+    }
+
+    function calculateCardSize() {
+      const board = document.getElementById('karuta-board');
+      if (!board || !state.isPlaying) return;
+
+      const rect = board.getBoundingClientRect();
+      const W_board = rect.width;
+      const H_board = rect.height;
+
+      const R = state.gridR;
+      const C = state.gridC;
+      if (!R || !C) return;
+
+      const G = 12; // ギャップ (12px)
+      const A = 1.3333; // 縦横比 (高さ / 幅 = 4 / 3)
+
+      const W_limit = (W_board - (C - 1) * G) / C;
+      const H_temp = (H_board - (R - 1) * G) / R;
+      const W_temp = H_temp / A;
+
+      // 画面をはみ出さない最小サイズを採択
+      const W_final = Math.floor(Math.min(W_limit, W_temp));
+      const H_final = Math.floor(W_final * A);
+
+      board.style.gridTemplateColumns = `repeat(${C}, ${W_final}px)`;
+      board.style.gridTemplateRows = `repeat(${R}, ${H_final}px)`;
+      board.style.gap = `${G}px`;
+
+      // CSS変数としてカード側に寸法を渡す
+      document.documentElement.style.setProperty('--card-w', `${W_final}px`);
+      document.documentElement.style.setProperty('--card-h', `${H_final}px`);
     }
 
     function getCardEl(card) {
