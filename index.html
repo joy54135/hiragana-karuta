@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ひらがな・カタカナ かるた</title>
-  <meta name="description" content="ひらがな・カタカナ・濁音・拗音に対応したかるたゲーム。ひとりでも対戦でも楽しめます。">
+  <meta name="description" content="ひらがな-カタカナ・濁音・拗音に対応したかるたゲーム。ひとりでも対戦でも楽しめます。">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -18,7 +18,6 @@
       font-family: "Klee One", "UD Digi Kyokasho N-R", "BIZ UDGothic", sans-serif;
     }
     
-    /* 暗めのネイビーを基調としたポップ背景 */
     .pop-bg {
       background-color: #1e293b;
       background-image: 
@@ -182,6 +181,15 @@
       color: #475569;
       background: #f8fafc;
     }
+
+    /* コレクション画面用スクロールバー非表示設定 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-800 h-screen flex flex-col font-ud-gothic select-none overflow-hidden">
@@ -223,6 +231,10 @@
     <section id="screen-start" class="flex-grow flex items-center justify-center p-2 md:p-4 pop-bg overflow-y-auto">
       <div class="bg-white/95 border-4 border-orange-400 max-w-md w-full p-4 md:p-6 rounded-3xl shadow-xl text-center relative overflow-hidden">
         
+        <button id="start-to-records-btn" class="absolute top-4 left-4 p-2 bg-orange-50 hover:bg-orange-100 rounded-xl text-orange-500 border border-orange-200 transition-colors shadow-sm" title="きろくをみる">
+          <i data-lucide="award" class="w-6 h-6"></i>
+        </button>
+
         <div class="flex justify-center mb-2">
           <div class="w-14 h-14 rounded-full border-4 border-orange-200 flex items-center justify-center bg-gradient-to-br from-orange-300 to-orange-500 shadow-sm">
             <span id="header-char-display" class="text-white font-bold text-2xl font-klee">あ</span>
@@ -230,7 +242,7 @@
         </div>
 
         <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
-        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 2.2</p>
+        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.1</p>
 
         <!-- サマリーバッジ -->
         <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
@@ -338,7 +350,7 @@
     </section>
 
     <!-- ===== ゲーム本番画面 ===== -->
-    <section id="screen-game" class="flex-grow h-full flex flex-col hidden pop-bg overflow-hidden">
+    <section id="screen-game" class="flex-grow h-full flex flex-col hidden pop-bg overflow-hidden z-20">
       
       <!-- 上部: 相手エリア -->
       <div id="cpu-status-area" class="bg-white/90 border-b-2 border-orange-200 px-4 py-2 flex justify-between items-center shadow-sm z-10 hidden">
@@ -415,7 +427,7 @@
     </section>
 
     <!-- ===== 結果画面 ===== -->
-    <section id="screen-result" class="flex-grow flex items-center justify-center p-3 md:p-6 pop-bg hidden overflow-y-auto">
+    <section id="screen-result" class="flex-grow flex items-center justify-center p-3 md:p-6 pop-bg hidden overflow-y-auto z-30">
       <div class="bg-white/95 border-4 border-orange-400 max-w-md w-full p-6 md:p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden">
         
         <div class="flex justify-center mb-3">
@@ -447,24 +459,96 @@
             <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="clock" class="w-5 h-5 text-emerald-500"></i> のこった じかん</span>
             <span class="font-black text-emerald-500 font-ud-gothic"><span id="res-time">0.0</span> びょう</span>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="flex items-center gap-2 font-ud-gothic"><i data-lucide="alert-circle" class="w-5 h-5 text-amber-500"></i> まちがえた かず</span>
-            <span class="font-black text-amber-500 font-ud-gothic"><span id="res-miss">0</span> かい</span>
+          <div class="flex justify-between items-start">
+            <span class="flex items-center gap-2 font-ud-gothic whitespace-nowrap"><i data-lucide="alert-circle" class="w-5 h-5 text-amber-500"></i> まちがえた カード</span>
+            <span class="font-black text-amber-500 font-ud-gothic text-right flex flex-wrap justify-end gap-1" id="res-miss-cards">なし</span>
           </div>
         </div>
 
         <div class="space-y-3">
-          <button id="rematch-btn" class="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-base md:text-lg font-ud-gothic">
-            もういっかい あそぶ
+          <button id="res-to-collection-btn" class="w-full bg-gradient-to-r from-orange-400 to-amber-400 text-white font-black py-3.5 px-4 rounded-xl shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-base md:text-lg font-ud-gothic flex items-center justify-center gap-2">
+            つぎへ (あつめたカード) <i data-lucide="arrow-right" class="w-5 h-5"></i>
           </button>
-          <button id="to-start-btn" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl border border-slate-300 transition-all text-sm md:text-base font-ud-gothic">
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== きろく一覧画面（スタート画面から） ===== -->
+    <section id="screen-records" class="flex-grow flex items-center justify-center p-3 md:p-6 pop-bg hidden overflow-y-auto z-30">
+      <div class="bg-white/95 border-4 border-orange-400 max-w-md w-full p-6 md:p-8 rounded-3xl shadow-2xl text-center relative flex flex-col max-h-full">
+        
+        <h2 class="text-2xl font-black text-orange-500 tracking-wider mb-2 font-ud-gothic">あそんだ きろく</h2>
+        
+        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 mb-4 flex-shrink-0">
+          <p class="text-amber-600 font-bold text-sm">💡 きろくは きえちゃうことがあるよ。</p>
+        </div>
+
+        <div id="records-list" class="flex-grow overflow-y-auto space-y-3 text-left bg-slate-50 p-3 rounded-xl border border-slate-200 min-h-[200px] max-h-[50vh]">
+           <!-- 記録がここに入る -->
+        </div>
+
+        <div class="mt-4 flex-shrink-0">
+          <button id="close-records-btn" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl border border-slate-300 transition-all text-sm md:text-base font-ud-gothic">
             もどる
           </button>
         </div>
       </div>
     </section>
 
+    <!-- ===== コレクション（五十音図鑑）画面 ===== -->
+    <section id="screen-collection" class="flex-grow flex flex-col hidden pop-bg overflow-hidden z-30">
+      
+      <div class="bg-white/95 border-b-4 border-orange-400 px-4 py-3 md:px-6 md:py-4 flex justify-between items-center shadow-md z-20 flex-shrink-0">
+        <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider font-ud-gothic flex items-center gap-2">
+          <i data-lucide="book-open" class="w-6 h-6"></i> あつめた カード
+        </h2>
+        <div class="flex gap-2">
+          <button id="col-rematch-btn" class="bg-gradient-to-r from-orange-400 to-amber-400 hover:opacity-90 text-white font-bold py-2 px-3 md:px-4 rounded-xl shadow transition-colors text-xs md:text-sm">もういっかい</button>
+          <button id="col-to-start-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-3 md:px-4 rounded-xl border border-slate-300 transition-colors text-xs md:text-sm">はじめへ</button>
+        </div>
+      </div>
+
+      <div class="bg-orange-50/90 p-2 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs md:text-sm font-bold text-slate-600 border-b border-orange-100 flex-shrink-0 relative z-30">
+        <div class="flex items-center gap-1"><span class="w-4 h-4 bg-white border-2 border-orange-300 rounded inline-block"></span> できた！(ミスなし)</div>
+        <div class="flex items-center gap-1"><span class="w-4 h-4 bg-yellow-100 border-2 border-yellow-300 rounded inline-block"></span> がんばった(ミスあり)</div>
+        <div class="flex items-center gap-1"><span class="w-4 h-4 bg-slate-200 border-2 border-slate-300 rounded inline-block"></span> まだ(みはっけん)</div>
+      </div>
+
+      <div id="collection-complete-msg" class="hidden text-center py-2 animate-bounce absolute top-32 left-0 right-0 z-40 pointer-events-none">
+        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-black px-4 py-2 rounded-full shadow-lg border-2 border-white text-sm md:text-base">🌟 ぜんぶ はっけん！ おめでとう！ 🌟</span>
+      </div>
+
+      <div class="flex-grow w-full relative">
+        <div class="bg-amber-50/80 absolute inset-0 flex justify-center py-4 px-2">
+          <!-- dir="rtl" によって、横スクロールの中身が確実に右(あ行)から左(わ行)へ自然に流れる美しいレイアウトを実現 -->
+          <div id="collection-scroll-area" class="w-full max-w-5xl h-full overflow-x-auto overflow-y-auto no-scrollbar rounded-xl border-4 border-white shadow-inner bg-white/50" dir="rtl">
+            <div id="collection-grid" class="flex gap-2 md:gap-4 p-4 w-max mx-auto h-full items-center">
+              <!-- JSで五十音表を動的生成 (中身の文字はltrに戻す) -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-shrink-0 bg-orange-50/90 py-2 border-t border-orange-100 flex justify-center z-20">
+        <button id="reset-collection-btn" class="text-xs font-bold text-slate-500 hover:text-rose-500 underline transition-colors"><i data-lucide="trash-2" class="w-3 h-3 inline-block align-text-bottom mr-1"></i>きろくを さいしょから やりなおす</button>
+      </div>
+    </section>
+
   </main>
+
+  <!-- きろくリセット確認モーダル -->
+  <div id="reset-confirm-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-4 border-rose-400 max-w-sm w-full p-6 rounded-3xl shadow-2xl relative text-center">
+      <h3 class="text-lg md:text-xl font-black text-rose-500 mb-3 tracking-wider font-ud-gothic">
+        ほんとうに けす？
+      </h3>
+      <p class="text-slate-600 font-bold mb-6 text-sm md:text-base">いままでの きろくや、<br>あつめたカードが ぜんぶ なくなるよ。</p>
+      <div class="flex gap-3">
+        <button id="cancel-reset-btn" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition-colors font-ud-gothic">やめる</button>
+        <button id="execute-reset-btn" class="flex-1 bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-xl transition-colors shadow-md font-ud-gothic">ぜんぶ けす</button>
+      </div>
+    </div>
+  </div>
 
   <!-- あそびかた説明モーダル -->
   <div id="help-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -495,8 +579,128 @@
 
   <script>
     // ============================================================
-    //   Ver 2.2 - ひらがな・カタカナ かるた (ポップデザイン・先頭和語版)
+    //   Ver 4.0 - 全て集めたときのスペシャル演出 ＆ リセット機能
     // ============================================================
+
+    // --- IndexedDB 安全保存機能 (コレクション対応 Ver 2) ---
+    const DB_NAME = 'KarutaAppDB';
+    const DB_VERSION = 2; // バージョンアップして cardStats ストアを追加
+    let db = null;
+
+    function initDB() {
+      return new Promise((resolve) => {
+        try {
+          if (!window.indexedDB) return resolve(null);
+          const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+          
+          request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains('playRecords')) {
+              db.createObjectStore('playRecords', { keyPath: 'id', autoIncrement: true });
+            }
+            // 文字ごとの学習状態（コレクション）を保存するストア
+            if (!db.objectStoreNames.contains('cardStats')) {
+              db.createObjectStore('cardStats', { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve(db);
+          };
+          request.onerror = () => resolve(null); // セキュリティエラー時もクラッシュさせない
+        } catch (e) {
+          console.warn('IndexedDB is blocked or unavailable.', e);
+          resolve(null);
+        }
+      });
+    }
+
+    async function saveRecord(record) {
+      if (!db) return;
+      try {
+        const transaction = db.transaction(['playRecords'], 'readwrite');
+        transaction.objectStore('playRecords').add(record);
+      } catch (e) {
+        console.warn('saveRecord error', e);
+      }
+    }
+
+    async function getRecords() {
+      if (!db) return [];
+      return new Promise((resolve) => {
+        try {
+          const transaction = db.transaction(['playRecords'], 'readonly');
+          const request = transaction.objectStore('playRecords').getAll();
+          request.onsuccess = (e) => {
+            const records = e.target.result || [];
+            resolve(records.sort((a, b) => b.date - a.date)); // 日付の新しい順にソート
+          };
+          request.onerror = () => resolve([]);
+        } catch (e) { resolve([]); }
+      });
+    }
+
+    // 文字ごとの状態を取得 (Map<char, 'perfect' | 'missed'>)
+    async function getCardStats(script, soundType) {
+      if (!db) return new Map();
+      return new Promise((resolve) => {
+        try {
+          const transaction = db.transaction(['cardStats'], 'readonly');
+          const request = transaction.objectStore('cardStats').getAll();
+          request.onsuccess = (e) => {
+            const records = e.target.result || [];
+            const map = new Map();
+            records.forEach(r => {
+              if (r.script === script && r.soundType === soundType) {
+                map.set(r.char, r.status);
+              }
+            });
+            resolve(map);
+          };
+          request.onerror = () => resolve(new Map());
+        } catch(e) { resolve(new Map()); }
+      });
+    }
+
+    // 獲得したカードの状態を一括保存・更新
+    async function updateCardStats(acquiredCards, script, soundType) {
+      if (!db) return;
+      try {
+        const transaction = db.transaction(['cardStats'], 'readwrite');
+        const store = transaction.objectStore('cardStats');
+        
+        acquiredCards.forEach(acq => {
+          const id = `${script}_${soundType}_${acq.char}`;
+          const request = store.get(id);
+          request.onsuccess = (e) => {
+            const existing = e.target.result;
+            let newStatus = acq.missed ? 'missed' : 'perfect';
+            
+            // 教育的配慮: 一度でもミス無し(perfect)で取れた文字は、白(perfect)状態を維持してあげる
+            if (existing && existing.status === 'perfect') {
+              newStatus = 'perfect';
+            }
+            
+            store.put({ id, script, soundType, char: acq.char, status: newStatus });
+          };
+        });
+      } catch (e) {
+        console.warn('updateCardStats error', e);
+      }
+    }
+
+    async function clearAllRecords() {
+      if (!db) return;
+      try {
+        const transaction = db.transaction(['playRecords', 'cardStats'], 'readwrite');
+        transaction.objectStore('playRecords').clear();
+        transaction.objectStore('cardStats').clear();
+      } catch (e) {
+        console.warn('clearAllRecords error', e);
+      }
+    }
+
+    initDB();
 
     // --- ひらがな データ ---
     const seionHira = [
@@ -517,7 +721,7 @@
       { char: 'へ', phrase: 'へびの、へ！' }, { char: 'ほ', phrase: 'ほしの、ほ！' },
       { char: 'ま', phrase: 'まりの、ま！' }, { char: 'み', phrase: 'みかんの、み！' },
       { char: 'む', phrase: 'むしの、む！' }, { char: 'め', phrase: 'めだかの、め！' },
-      { char: 'も', phrase: 'ももの、も！' }, { char: 'や', phrase: 'やぎの、や！' },
+      { char: 'も', phrase: 'もものの、も！' }, { char: 'や', phrase: 'やぎの、や！' },
       { char: 'ゆ', phrase: 'ゆきの、ゆ！' }, { char: 'よ', phrase: 'よるの、よ！' },
       { char: 'ら', phrase: 'らっこの、ら！' }, { char: 'り', phrase: 'りすの、り！' },
       { char: 'る', phrase: 'るすばんの、る！' }, { char: 'れ', phrase: 'れんこんの、れ！' },
@@ -526,16 +730,16 @@
     ];
 
     const dakuonHira = [
-      { char: 'が', phrase: 'いちごの、が！' }, { char: 'ぎ', phrase: 'うさぎの、ぎ！' },
-      { char: 'ぐ', phrase: 'りんごの、ぐ！' }, { char: 'げ', phrase: 'ひげの、げ！' },
+      { char: 'が', phrase: 'がいこくの、が！' }, { char: 'ぎ', phrase: 'ぎんこうの、ぎ！' },
+      { char: 'ぐ', phrase: 'ぐんまけんの、ぐ！' }, { char: 'げ', phrase: 'げんきの、げ！' },
       { char: 'ご', phrase: 'ごりらの、ご！' }, { char: 'ざ', phrase: 'ざりがにの、ざ！' },
-      { char: 'じ', phrase: 'にじの、じ！' }, { char: 'ず', phrase: 'すずめの、ず！' },
+      { char: 'じ', phrase: 'じかんの、じ！' }, { char: 'ず', phrase: 'すずめの、ず！' },
       { char: 'ぜ', phrase: 'かぜの、ぜ！' }, { char: 'ぞ', phrase: 'ぞうの、ぞ！' },
       { char: 'だ', phrase: 'だるまの、だ！' }, { char: 'ぢ', phrase: 'ちぢみの、ぢ！' },
       { char: 'づ', phrase: 'みかづきの、づ！' }, { char: 'で', phrase: 'でんしゃの、で！' },
       { char: 'ど', phrase: 'どんぐりの、ど！' }, { char: 'ば', phrase: 'ばななの、ば！' },
-      { char: 'び', phrase: 'えびの、び！' }, { char: 'ぶ', phrase: 'ぶどうの、ぶ！' },
-      { char: 'べ', phrase: 'なべの、べ！' }, { char: 'ぼ', phrase: 'ぼうしの、ぼ！' },
+      { char: 'び', phrase: 'びんの、び！' }, { char: 'ぶ', phrase: 'ぶどうの、ぶ！' },
+      { char: 'べ', phrase: 'べんきょうの、べ！' }, { char: 'ぼ', phrase: 'ぼうしの、ぼ！' },
       { char: 'ぱ', phrase: 'ぱんの、ぱ！' }, { char: 'ぴ', phrase: 'ぴーまんの、ぴ！' },
       { char: 'ぷ', phrase: 'ぷりんの、ぷ！' }, { char: 'ぺ', phrase: 'ぺんぎんの、ぺ！' },
       { char: 'ぽ', phrase: 'ぽけっとの、ぽ！' }
@@ -576,12 +780,12 @@
       { char: 'ナ', phrase: 'ナイフの、ナ！' }, { char: 'ニ', phrase: 'ニンジャの、ニ！' },
       { char: 'ヌ', phrase: 'ヌードルの、ヌ！' }, { char: 'ネ', phrase: 'ネクタイの、ネ！' },
       { char: 'ノ', phrase: 'ノートの、ノ！' }, { char: 'ハ', phrase: 'ハンバーガーの、ハ！' },
-      { char: 'ヒ', phrase: 'ヒーローの、ヒ！' }, { char: 'フ', phrase: 'フォークの、フ！' },
+      { char: 'ヒ', phrase: 'ヒーローの、ヒ！' }, { char: 'フ', phrase: 'フランスの、フ！' },
       { char: 'ヘ', phrase: 'ヘリコプターの、ヘ！' }, { char: 'ホ', phrase: 'ホットケーキの、ホ！' },
       { char: 'マ', phrase: 'マイクの、マ！' }, { char: 'ミ', phrase: 'ミルクの、ミ！' },
       { char: 'ム', phrase: 'ムースの、ム！' }, { char: 'メ', phrase: 'メロンの、メ！' },
       { char: 'モ', phrase: 'モーターの、モ！' }, { char: 'ヤ', phrase: 'ヤクルトの、ヤ！' },
-      { char: 'ユ', phrase: 'ユニコーンの、ユ！' }, { char: 'ヨ', phrase: 'ヨットの、ヨ！' },
+      { char: 'ユ', phrase: 'ユニコーンの、ユ！' }, { char: 'ヨ', phrase: 'ヨット of、ヨ！' },
       { char: 'ラ', phrase: 'ライオンの、ラ！' }, { char: 'リ', phrase: 'リボンの、リ！' },
       { char: 'ル', phrase: 'ルーペの、ル！' }, { char: 'レ', phrase: 'レモンの、レ！' },
       { char: 'ロ', phrase: 'ロボットの、ロ！' }, { char: 'ワ', phrase: 'ワニの、ワ！' },
@@ -589,19 +793,21 @@
     ];
 
     const dakuonKata = [
-      { char: 'ガ', phrase: 'ハンバーガーの、ガ！' }, { char: 'ギ', phrase: 'ウサギの、ギ！' },
+      { char: 'ガ', phrase: 'ガーリックの、ガ！' }, { char: 'ギ', phrase: 'ギターの、ギ！' },
       { char: 'グ', phrase: 'グミの、グ！' }, { char: 'ゲ', phrase: 'ゲームの、ゲ！' },
-      { char: 'ゴ', phrase: 'リンゴジュースの、ゴ！' }, { char: 'ザ', phrase: 'ピザの、ザ！' },
-      { char: 'ジ', phrase: 'ジュースの、ジ！' }, { char: 'ズ', phrase: 'チーズの、ズ！' },
-      { char: 'ゼ', phrase: 'プレゼントの、ゼ！' }, { char: 'ゾ', phrase: 'ゾウの、ゾ！' },
-      { char: 'ダ', phrase: 'サンダルの、ダ！' }, { char: 'ヂ', phrase: 'ラジオの、ヂ！' },
-      { char: 'ヅ', phrase: 'チーズの、ヅ！' }, { char: 'デ', phrase: 'デザートの、デ！' },
+      { char: 'ゴ', phrase: 'ゴリラの、ゴ！' }, { char: 'ザ', phrase: 'ピザの、ザ！' },
+      { char: 'ジ', phrase: 'ジグソーパズルの、ジ！' }, { char: 'ズ', phrase: 'ズッキーニの、ズ！' },
+      { char: 'ゼ', phrase: 'ゼラチンの、ゼ！' }, { char: 'ゾ', phrase: 'ゾウの、ゾ！' },
+      { char: 'ダ', phrase: 'ダチョウの、ダ！' }, 
+      { char: 'ヂ', phrase: 'チヂミの、ヂ！' },
+      { char: 'ヅ', phrase: 'マナヅルの、ヅ！' },
+      { char: 'デ', phrase: 'デザートの、デ！' },
       { char: 'ド', phrase: 'ドーナツの、ド！' }, { char: 'バ', phrase: 'バナナの、バ！' },
-      { char: 'ビ', phrase: 'テレビの、ビ！' }, { char: 'ブ', phrase: 'ブランコの、ブ！' },
+      { char: 'ビ', phrase: 'ビデオの、ビ！' }, { char: 'ブ', phrase: 'ブランコの、ブ！' },
       { char: 'ベ', phrase: 'ベッドの、ベ！' }, { char: 'ボ', phrase: 'ボールの、ボ！' },
       { char: 'パ', phrase: 'パンの、パ！' }, { char: 'ピ', phrase: 'ピーマンの、ピ！' },
       { char: 'プ', phrase: 'プリンの、プ！' }, { char: 'ペ', phrase: 'ペンギンの、ペ！' },
-      { char: 'ポ', phrase: 'ポケットの、ポ！' }
+      { char: 'ポ', phrase: 'ポケット of、ポ！' }
     ];
 
     const youonKata = [
@@ -610,7 +816,7 @@
       { char: 'シュ', phrase: 'シュークリームの、シュ！' }, { char: 'ショ', phrase: 'ショベルカーの、ショ！' },
       { char: 'チャ', phrase: 'チャーハンの、チャ！' }, { char: 'チュ', phrase: 'チューリップの、チュ！' },
       { char: 'チョ', phrase: 'チョコレートの、チョ！' }, { char: 'ニャ', phrase: 'ニャンコの、ニャ！' },
-      { char: 'ニュ', phrase: 'ギュウニュウの、ニュ！' }, { char: 'ニョ', phrase: 'ニョロニョロの、ニョ！' },
+      { char: 'ニュ', phrase: 'ニュースの、ニュ！' }, { char: 'ニョ', phrase: 'ニョロニョロの、ニョ！' },
       { char: 'ヒャ', phrase: 'ヒャクの、ヒャ！' }, { char: 'ヒュ', phrase: 'ヒューンの、ヒュ！' },
       { char: 'ヒョ', phrase: 'ヒョウの、ヒョ！' }, { char: 'ミャ', phrase: 'ミャオの、ミャ！' },
       { char: 'ミュ', phrase: 'ミュージックの、ミュ！' }, { char: 'ミョ', phrase: 'ミョウガの、ミョ！' },
@@ -623,6 +829,46 @@
       { char: 'ピャ', phrase: 'ピャッの、ピャ！' }, { char: 'ピュ', phrase: 'ピューマの、ピュ！' },
       { char: 'ピョ', phrase: 'ピョンピョンの、ピョ！' }
     ];
+
+    // --- コレクション（五十音）レイアウトマッピング ---
+    const collectionLayouts = {
+      seion: [
+        ['あ','い','う','え','お'],
+        ['か','き','く','け','こ'],
+        ['さ','し','す','せ','そ'],
+        ['た','ち','つ','て','と'],
+        ['な','に','ぬ','ね','の'],
+        ['は','ひ','ふ','へ','ほ'],
+        ['ま','み','む','め','も'],
+        ['や', null,'ゆ', null,'よ'],
+        ['ら','り','る','れ','ろ'],
+        ['わ', null,'を', null,'ん']
+      ],
+      dakuon: [
+        ['が','ぎ','ぐ','げ','ご'],
+        ['ざ','じ','ず','ぜ','ぞ'],
+        ['だ','ぢ','づ','で','ど'],
+        ['ば','び','ぶ','べ','ぼ'],
+        ['ぱ','ぴ','ぷ','ぺ','ぽ']
+      ],
+      youon: [
+        ['きゃ','きゅ','きょ'],
+        ['しゃ','しゅ','しょ'],
+        ['ちゃ','ちゅ','ちょ'],
+        ['にゃ','にゅ','にょ'],
+        ['ひゃ','ひゅ','ひょ'],
+        ['みゃ','みゅ','みょ'],
+        ['りゃ','りゅ','りょ'],
+        ['ぎゃ','ぎゅ','ぎょ'],
+        ['じゃ','じゅ','じょ'],
+        ['びゃ','びゅ','びょ'],
+        ['ぴゃ','ぴゅ','ぴょ']
+      ]
+    };
+
+    function toKatakana(str) {
+      return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+    }
 
     // ゲーム設定
     const config = {
@@ -649,7 +895,11 @@
       isInputLocked: false,
       cpuActionTimeout: null,
       gridR: 0,
-      gridC: 0
+      gridC: 0,
+      
+      // コレクション記録用
+      cardMisses: {},      // 今回のゲームでの文字ごとのミス回数
+      acquiredCards: []    // 今回のゲームでプレイヤーが獲得したカード配列 {char, missed}
     };
 
     const mainHeader = document.getElementById('main-header');
@@ -831,6 +1081,39 @@
           osc.stop(now + idx * 0.08 + 0.3);
         });
       },
+      playComplete() {
+        if (!config.soundOn) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; 
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          const time = now + idx * 0.1;
+          osc.frequency.setValueAtTime(freq, time);
+          gain.gain.setValueAtTime(0.15, time);
+          gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(time);
+          osc.stop(time + 0.5);
+        });
+        
+        const lastNow = now + 0.4;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, lastNow);
+          gain.gain.setValueAtTime(0.1, lastNow);
+          gain.gain.exponentialRampToValueAtTime(0.01, lastNow + 1.0);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(lastNow);
+          osc.stop(lastNow + 1.0);
+        });
+      },
       playCpuGet() {
         if (!config.soundOn) return;
         this.init();
@@ -852,6 +1135,9 @@
     const startScreen  = document.getElementById('screen-start');
     const gameScreen   = document.getElementById('screen-game');
     const resultScreen = document.getElementById('screen-result');
+    const recordsScreen = document.getElementById('screen-records');
+    const collectionScreen = document.getElementById('screen-collection');
+    
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
     const soundIcon      = document.getElementById('sound-icon');
     const helpBtn        = document.getElementById('help-btn');
@@ -883,19 +1169,152 @@
       closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
 
       document.getElementById('abandon-btn').addEventListener('click', abandonGame);
-      document.getElementById('rematch-btn').addEventListener('click', handleStartClick);
-      document.getElementById('to-start-btn').addEventListener('click', () => {
-        resultScreen.classList.add('hidden');
-        startScreen.classList.remove('hidden');
-        mainHeader.classList.remove('hidden');
-        goToStep(1);
-      });
+      
+      // コレクションからのリトライ＆戻る
+      document.getElementById('col-rematch-btn').addEventListener('click', handleStartClick);
+      document.getElementById('col-to-start-btn').addEventListener('click', goHome);
+
       document.getElementById('replay-btn').addEventListener('click', () => {
         if (state.currentCard && state.isPlaying) speakText(state.currentCard);
       });
-    };
 
-    function handleStartClick() {
+      // 画面遷移イベント
+      document.getElementById('start-to-records-btn').addEventListener('click', showRecords);
+      document.getElementById('close-records-btn').addEventListener('click', hideRecords);
+      document.getElementById('res-to-collection-btn').addEventListener('click', showCollection);
+
+      // リセット（データ消去）イベント
+      document.getElementById('reset-collection-btn').addEventListener('click', () => {
+        document.getElementById('reset-confirm-modal').classList.remove('hidden');
+      });
+      document.getElementById('cancel-reset-btn').addEventListener('click', () => {
+        document.getElementById('reset-confirm-modal').classList.add('hidden');
+      });
+      document.getElementById('execute-reset-btn').addEventListener('click', async () => {
+        document.getElementById('reset-confirm-modal').classList.add('hidden');
+        await clearAllRecords();
+        showCollection(); 
+      });
+    };
+    
+    function goHome() {
+      resultScreen.classList.add('hidden');
+      collectionScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      mainHeader.classList.remove('hidden');
+      goToStep(1);
+    }
+
+    function showRecords() {
+      startScreen.classList.add('hidden');
+      recordsScreen.classList.remove('hidden');
+      renderRecords();
+    }
+
+    function hideRecords() {
+      recordsScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+    }
+
+    function renderRecords() {
+      const listEl = document.getElementById('records-list');
+      listEl.innerHTML = '<div class="text-center text-slate-400 py-4 font-bold">よみこみ中...</div>';
+      
+      getRecords().then(records => {
+        if (records.length === 0) {
+          listEl.innerHTML = '<div class="text-center text-slate-400 py-4 font-bold">まだ きろくが ないよ</div>';
+          return;
+        }
+
+        listEl.innerHTML = '';
+        records.forEach(rec => {
+          const d = new Date(rec.date);
+          const dateStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+          let modeStr = rec.mode === 'solo' ? '🙋 ひとり' : '🤝 あいてと';
+          let typeStr = rec.script === 'hiragana' ? 'ひらがな' : 'カタカナ';
+
+          const item = document.createElement('div');
+          item.className = 'bg-white p-3 rounded-lg border border-slate-200 shadow-sm';
+          item.innerHTML = `
+            <div class="flex justify-between items-center mb-1 border-b border-slate-100 pb-1">
+              <span class="text-xs text-slate-500 font-bold">${dateStr}</span>
+              <span class="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">${typeStr} ${rec.size}まい</span>
+            </div>
+            <div class="flex justify-between items-end mt-2">
+              <span class="text-sm font-bold text-slate-600">${modeStr}</span>
+              <span class="text-xl font-black text-orange-500">${rec.score}<span class="text-xs ml-1 text-slate-500">てん</span></span>
+            </div>
+          `;
+          listEl.appendChild(item);
+        });
+      });
+    }
+
+    // ===== コレクション（図鑑）の描画 =====
+    async function showCollection() {
+      resultScreen.classList.add('hidden');
+      collectionScreen.classList.remove('hidden');
+
+      const container = document.getElementById('collection-grid');
+      container.innerHTML = '<div class="text-white font-bold animate-pulse">よみこみ中...</div>';
+
+      // IndexedDB から文字ごとの状態を取得
+      const stats = await getCardStats(config.script, config.soundType);
+      const layout = collectionLayouts[config.soundType] || collectionLayouts['seion'];
+
+      let html = '';
+      let totalCards = 0;
+      let perfectCards = 0;
+      
+      layout.forEach(col => {
+        html += '<div class="flex flex-col gap-2 md:gap-3" dir="ltr">';
+        col.forEach(char => {
+          if (char === null) {
+            html += '<div class="w-12 h-16 md:w-16 md:h-20 flex-shrink-0"></div>'; // 余白
+          } else {
+            totalCards++;
+            let displayChar = config.script === 'katakana' ? toKatakana(char) : char;
+            const stat = stats.get(displayChar);
+            let bgClass = "bg-slate-200/80 border-slate-300 shadow-inner"; // まだ（unplayed）
+            let textClass = "text-slate-300/50"; // 文字をかなり薄くする
+            
+            if (stat === 'perfect') {
+              bgClass = "bg-white border-orange-300 shadow-[0_4px_0_#cbd5e1]"; // できた！
+              textClass = "text-slate-800";
+              perfectCards++;
+            } else if (stat === 'missed') {
+              bgClass = "bg-yellow-100 border-yellow-300 shadow-[0_4px_0_#fde047]"; // がんばった
+              textClass = "text-yellow-700";
+            }
+            
+            const sizeClass = displayChar.length > 1 ? "text-base md:text-xl" : "text-xl md:text-3xl";
+
+            html += `
+              <div class="${bgClass} border-2 md:border-[3px] rounded-xl w-12 h-16 md:w-16 md:h-20 flex items-center justify-center font-klee font-black ${sizeClass} ${textClass} transition-all flex-shrink-0">
+                ${displayChar}
+              </div>
+            `;
+          }
+        });
+        html += '</div>';
+      });
+
+      container.innerHTML = html;
+
+      // コンプリート判定と演出
+      const msgEl = document.getElementById('collection-complete-msg');
+      if (totalCards > 0 && totalCards === perfectCards) {
+        msgEl.classList.remove('hidden');
+        setTimeout(() => {
+          triggerMegaConfetti();
+          if (sound.ctx) sound.playComplete(); 
+        }, 300);
+      } else {
+        msgEl.classList.add('hidden');
+      }
+    }
+
+    async function handleStartClick() {
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
         const dummyUtterance = new SpeechSynthesisUtterance('');
@@ -904,27 +1323,23 @@
       }
       sound.init();
       if (sound.ctx && sound.ctx.state === 'suspended') sound.ctx.resume();
-      initGame();
+      
+      await initGame();
     }
 
     function speakText(card) {
       if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
 
-        // 読み上げ用テキストの調整（助詞の誤読防止とアクセント改善）
         let speakStr = card.phrase;
-        
-        // 「は」「へ」が助詞「わ」「え」と読まれるのを防ぐため、カタカナに変換して読ませる
         speakStr = speakStr.replace(/、は！$/, '、ハ！');
         speakStr = speakStr.replace(/、へ！$/, '、ヘ！');
-        
-        // アクセントをより自然な区切りにするため、読点をピリオドに変換（エンジンによって自然に間が空きやすくなる）
         speakStr = speakStr.replace('の、', 'の。');
 
         const utterance = new SpeechSynthesisUtterance(speakStr);
         utterance.lang = 'ja-JP';
         utterance.rate = config.speed;
-        utterance.pitch = 1.0; // ピッチを標準(1.0)に戻し、自然な日本語のアクセントにする
+        utterance.pitch = 1.0; 
         utterance.muted = !config.soundOn;
 
         const voices = speechSynthesis.getVoices();
@@ -939,10 +1354,12 @@
       }
     }
 
-    function initGame() {
+    // ===== アダプティブ（優先）出題アルゴリズム =====
+    async function initGame() {
       if (mainHeader) mainHeader.classList.add('hidden');
       startScreen.classList.add('hidden');
       resultScreen.classList.add('hidden');
+      collectionScreen.classList.add('hidden');
       gameScreen.classList.remove('hidden');
 
       state.playerScore = 0;
@@ -951,6 +1368,8 @@
       state.isPlaying = true;
       state.isInputLocked = false;
       state.timeLeft = 120; // 制限時間一律120秒固定
+      state.cardMisses = {}; // ミス管理リセット
+      state.acquiredCards = []; // 獲得管理リセット
 
       document.getElementById('player-score').textContent = '0';
       document.getElementById('cpu-score').textContent = '0';
@@ -966,8 +1385,36 @@
       }
 
       const allKaruta = getCurrentKarutaData();
-      const shuffledAll = [...allKaruta].sort(() => Math.random() - 0.5);
-      state.boardCards = shuffledAll.slice(0, config.size);
+      
+      // DBから現在の学習状態（ステータス）を取得
+      const stats = await getCardStats(config.script, config.soundType);
+
+      // --- 重み付け抽選処理 ---
+      // 未回答・苦手な文字を優先しつつ、適度なランダム性を加えて飽きさせない
+      const scoredKaruta = allKaruta.map(card => {
+        let priorityScore = 0;
+        const stat = stats.get(card.char);
+        
+        if (!stat) {
+          priorityScore += 50; // 最優先: まだ一度も取っていない文字
+        } else if (stat === 'missed') {
+          priorityScore += 20; // 優先: 過去にミスして獲得した文字
+        } else if (stat === 'perfect') {
+          priorityScore += 0;  // 優先度低: 完璧に取れた文字
+        }
+        
+        // ランダムな揺らぎ（0〜20）を足して、たまに得意な文字も出るようにする
+        priorityScore += Math.random() * 20;
+        
+        return { card, priorityScore };
+      });
+
+      // スコアが高い順（優先度が高い順）にソートして抽出
+      scoredKaruta.sort((a, b) => b.priorityScore - a.priorityScore);
+      const selectedCards = scoredKaruta.slice(0, config.size).map(item => item.card);
+
+      // 盤面に並べるため、抽出したカードをさらにランダムシャッフル
+      state.boardCards = [...selectedCards].sort(() => Math.random() - 0.5);
       state.remainingCards = [...state.boardCards];
 
       document.getElementById('remaining-count').textContent = state.remainingCards.length + 'まい';
@@ -1007,9 +1454,8 @@
       const displayCards = [...state.boardCards].sort(() => Math.random() - 0.5);
 
       const isYouon = config.soundType === 'youon';
-      const fontSizeFactor = isYouon ? 0.35 : 0.55; // カード幅に対する文字サイズの比率
+      const fontSizeFactor = isYouon ? 0.35 : 0.55; 
 
-      // 画面の縦横比を取得して、列数・行数を決定
       const boardRect = karutaBoard.getBoundingClientRect();
       const isPortrait = boardRect.height > boardRect.width;
 
@@ -1019,9 +1465,9 @@
         state.gridR = 4; state.gridC = 4; 
       } else if (config.size === 24) {
         if (isPortrait) {
-          state.gridR = 6; state.gridC = 4; // スマホ等（縦長）
+          state.gridR = 6; state.gridC = 4; 
         } else {
-          state.gridR = 4; state.gridC = 6; // PC・タブレット（横長）
+          state.gridR = 4; state.gridC = 6; 
         }
       }
 
@@ -1041,10 +1487,7 @@
         karutaBoard.appendChild(cardBtn);
       });
 
-      // 描画直後にサイズ計算を実行
-      requestAnimationFrame(() => {
-        calculateCardSize();
-      });
+      requestAnimationFrame(() => calculateCardSize());
     }
 
     function calculateCardSize() {
@@ -1059,14 +1502,13 @@
       const C = state.gridC;
       if (!R || !C) return;
 
-      const G = 12; // ギャップ (12px)
-      const A = 1.3333; // 縦横比 (高さ / 幅 = 4 / 3)
+      const G = 12; 
+      const A = 1.3333; 
 
       const W_limit = (W_board - (C - 1) * G) / C;
       const H_temp = (H_board - (R - 1) * G) / R;
       const W_temp = H_temp / A;
 
-      // 画面をはみ出さない最小サイズを採択
       const W_final = Math.floor(Math.min(W_limit, W_temp));
       const H_final = Math.floor(W_final * A);
 
@@ -1074,7 +1516,6 @@
       board.style.gridTemplateRows = `repeat(${R}, ${H_final}px)`;
       board.style.gap = `${G}px`;
 
-      // CSS変数としてカード側に寸法を渡す
       document.documentElement.style.setProperty('--card-w', `${W_final}px`);
       document.documentElement.style.setProperty('--card-h', `${H_final}px`);
     }
@@ -1091,7 +1532,7 @@
       if (card.char === state.currentCard.char) {
         playerGetCard(card);
       } else {
-        playerMiss(cardEl);
+        playerMiss(cardEl, card);
       }
     }
 
@@ -1100,6 +1541,13 @@
       sound.playCorrect();
       state.playerScore++;
       document.getElementById('player-score').textContent = state.playerScore;
+      
+      // 獲得情報を記録 (ミスしたことがあれば true)
+      state.acquiredCards.push({
+        char: card.char,
+        missed: (state.cardMisses[card.char] || 0) > 0
+      });
+
       markCardAsTaken(card, 'player');
     }
 
@@ -1166,10 +1614,13 @@
       }
     }
 
-    function playerMiss(cardEl) {
+    function playerMiss(cardEl, card) {
       sound.playIncorrect();
       state.missCount++;
       state.isInputLocked = true;
+
+      // 該当文字のミス回数を記録
+      state.cardMisses[card.char] = (state.cardMisses[card.char] || 0) + 1;
 
       cardEl.classList.add('border-rose-500', 'bg-rose-100', 'animate-shake');
 
@@ -1306,8 +1757,8 @@
 
       // --- 5歳児向け ポジティブスコア計算 ---
       let totalScore = 0;
-      const kSize = config.size / 24; // 枚数比例係数 (24枚を1.0とする)
-      let baseMax = 120; // ひとりの時の基本最高目標点
+      const kSize = config.size / 24; 
+      let baseMax = 120; 
       
       if (config.mode === 'vs') {
         if (config.cpuLevel === 'easy') baseMax = 100;
@@ -1315,22 +1766,29 @@
         else if (config.cpuLevel === 'hard') baseMax = 300;
       }
 
-      // 1. カード獲得点 (配分: 70%)
       const cardScore = (baseMax * 0.7 / 24) * state.playerScore;
-      
-      // 2. スピードボーナス (配分: 20%)
       const speedScore = (state.timeLeft / 120) * (baseMax * 0.2 * kSize);
-      
-      // 3. ノーミスボーナス (配分: 10%)
       let missScore = 0;
       if (state.missCount === 0) {
-        missScore = baseMax * 0.1 * kSize; // 満額加点
+        missScore = baseMax * 0.1 * kSize; 
       } else if (state.missCount <= 2) {
-        missScore = baseMax * 0.05 * kSize; // 半額加点（がんばり賞）
+        missScore = baseMax * 0.05 * kSize; 
       }
-
       totalScore = Math.round(cardScore + speedScore + missScore);
       // --------------------------------------
+
+      // IndexedDBへ記録＆コレクション（学習ステータス）を保存
+      const record = {
+        date: Date.now(),
+        mode: config.mode,
+        cpuLevel: config.mode === 'vs' ? config.cpuLevel : null,
+        script: config.script,
+        soundType: config.soundType,
+        size: config.size,
+        score: totalScore
+      };
+      saveRecord(record);
+      updateCardStats(state.acquiredCards, config.script, config.soundType);
 
       document.getElementById('result-status-badge').textContent = badgeEmoji;
       document.getElementById('result-title').textContent = textTitle;
@@ -1339,7 +1797,16 @@
       document.getElementById('res-player-score').textContent = state.playerScore;
       document.getElementById('res-cpu-score').textContent = state.cpuScore;
       document.getElementById('res-time').textContent = state.timeLeft.toFixed(1);
-      document.getElementById('res-miss').textContent = state.missCount;
+      
+      const missedChars = Object.keys(state.cardMisses);
+      if (missedChars.length === 0) {
+        document.getElementById('res-miss-cards').textContent = 'なし';
+      } else {
+        document.getElementById('res-miss-cards').innerHTML = missedChars.map(char => {
+          const displayChar = config.script === 'katakana' ? toKatakana(char) : char;
+          return `<span class="bg-amber-100 px-2 py-0.5 rounded text-amber-600">${displayChar}</span>`;
+        }).join('');
+      }
 
       gameScreen.classList.add('hidden');
       resultScreen.classList.remove('hidden');
