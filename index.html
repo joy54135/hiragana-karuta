@@ -234,6 +234,9 @@
         <button id="start-to-records-btn" class="absolute top-4 left-4 p-2 bg-orange-50 hover:bg-orange-100 rounded-xl text-orange-500 border border-orange-200 transition-colors shadow-sm" title="きろくをみる">
           <i data-lucide="award" class="w-6 h-6"></i>
         </button>
+        <button id="start-to-collection-btn" class="absolute top-4 right-4 p-2 bg-orange-50 hover:bg-orange-100 rounded-xl text-orange-500 border border-orange-200 transition-colors shadow-sm" title="あつめたカードをみる">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </button>
 
         <div class="flex justify-center mb-2">
           <div class="w-14 h-14 rounded-full border-4 border-orange-200 flex items-center justify-center bg-gradient-to-br from-orange-300 to-orange-500 shadow-sm">
@@ -242,7 +245,7 @@
         </div>
 
         <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
-        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.1</p>
+        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.2</p>
 
         <!-- サマリーバッジ -->
         <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
@@ -498,13 +501,27 @@
     <!-- ===== コレクション（五十音図鑑）画面 ===== -->
     <section id="screen-collection" class="flex-grow flex flex-col hidden pop-bg overflow-hidden z-30">
       
-      <div class="bg-white/95 border-b-4 border-orange-400 px-4 py-3 md:px-6 md:py-4 flex justify-between items-center shadow-md z-20 flex-shrink-0">
-        <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider font-ud-gothic flex items-center gap-2">
-          <i data-lucide="book-open" class="w-6 h-6"></i> あつめた カード
-        </h2>
-        <div class="flex gap-2">
-          <button id="col-rematch-btn" class="bg-gradient-to-r from-orange-400 to-amber-400 hover:opacity-90 text-white font-bold py-2 px-3 md:px-4 rounded-xl shadow transition-colors text-xs md:text-sm">もういっかい</button>
-          <button id="col-to-start-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-3 md:px-4 rounded-xl border border-slate-300 transition-colors text-xs md:text-sm">はじめへ</button>
+      <div class="bg-white/95 border-b-4 border-orange-400 px-4 py-3 md:px-6 md:py-4 flex flex-col gap-2 shadow-md z-20 flex-shrink-0">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider font-ud-gothic flex items-center gap-2">
+            <i data-lucide="book-open" class="w-6 h-6"></i> あつめた カード
+          </h2>
+          <div class="flex gap-2">
+            <button id="col-rematch-btn" class="bg-gradient-to-r from-orange-400 to-amber-400 hover:opacity-90 text-white font-bold py-2 px-3 md:px-4 rounded-xl shadow transition-colors text-xs md:text-sm">もういっかい</button>
+            <button id="col-to-start-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-3 md:px-4 rounded-xl border border-slate-300 transition-colors text-xs md:text-sm">はじめへ</button>
+          </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-2 mt-1">
+          <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <button id="col-tab-hiragana" class="flex-1 text-xs md:text-sm font-bold py-1 px-3 rounded-md bg-white shadow-sm text-orange-500" onclick="changeCollectionScript('hiragana')">ひらがな</button>
+            <button id="col-tab-katakana" class="flex-1 text-xs md:text-sm font-bold py-1 px-3 rounded-md text-slate-500 hover:text-slate-700 transition-colors" onclick="changeCollectionScript('katakana')">カタカナ</button>
+          </div>
+          <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 flex-grow">
+            <button id="col-tab-seion" class="flex-1 text-xs md:text-sm font-bold py-1 px-2 rounded-md bg-white shadow-sm text-orange-500" onclick="changeCollectionSound('seion')">せいおん</button>
+            <button id="col-tab-dakuon" class="flex-1 text-xs md:text-sm font-bold py-1 px-2 rounded-md text-slate-500 hover:text-slate-700 transition-colors" onclick="changeCollectionSound('dakuon')">だくおん</button>
+            <button id="col-tab-youon" class="flex-1 text-xs md:text-sm font-bold py-1 px-2 rounded-md text-slate-500 hover:text-slate-700 transition-colors" onclick="changeCollectionSound('youon')">ようおん</button>
+          </div>
         </div>
       </div>
 
@@ -750,14 +767,14 @@
       { char: 'きょ', phrase: 'きょうりゅうの、きょ！' }, { char: 'しゃ', phrase: 'しゃぼんだまの、しゃ！' },
       { char: 'しゅ', phrase: 'しゅりけんの、しゅ！' }, { char: 'しょ', phrase: 'しょうぼうしゃの、しょ！' },
       { char: 'ちゃ', phrase: 'ちゃわんの、ちゃ！' }, { char: 'ちゅ', phrase: 'ちゅうりっぷの、ちゅ！' },
-      { char: 'ちょ', phrase: 'ちょうちょの、ちょ！' }, { char: 'にゃ', phrase: 'にゃんこの、にゃ！' },
-      { char: 'にゅ', phrase: 'ぎゅうにゅうの、にゅ！' }, { char: 'にょ', phrase: 'にょろにょろの、にょ！' },
+      { char: 'ちょ', phrase: 'ちょうちょの、ちょ！' }, { char: 'にゃ', phrase: 'にゃんこ of、にゃ！' },
+      { char: 'にゅ', phrase: 'ぎゅうにゅうの、にゅ！' }, { char: 'niょ', phrase: 'にょろにょろの、にょ！' },
       { char: 'ひゃ', phrase: 'ひゃくの、ひゃ！' }, { char: 'ひゅ', phrase: 'ひゅーんの、ひゅ！' },
       { char: 'ひょ', phrase: 'ひょうの、ひょ！' }, { char: 'みゃ', phrase: 'みゃおの、みゃ！' },
       { char: 'みゅ', phrase: 'ぎゅうにゅうの、みゅ！' }, { char: 'みょ', phrase: 'みょうがの、みょ！' },
       { char: 'りゃ', phrase: 'りゃまの、りゃ！' }, { char: 'りゅ', phrase: 'きょうりゅうの、りゅ！' },
       { char: 'りょ', phrase: 'りょうりの、りょ！' }, { char: 'ぎゃ', phrase: 'ぎゃくてんの、ぎゃ！' },
-      { char: 'ぎゅ', phrase: 'ぎゅうにゅうの、ぎゅ！' }, { char: 'ぎょ', phrase: 'きんぎょの、ぎょ！' },
+      { char: 'ぎゅ', phrase: 'ぎゅうにゅうの、ぎゅ！' }, { char: 'giょ', phrase: 'きんぎょの、ぎょ！' },
       { char: 'じゃ', phrase: 'じゃがいもの、じゃ！' }, { char: 'じゅ', phrase: 'じゅーすの、じゅ！' },
       { char: 'じょ', phrase: 'じょうろの、じょ！' }, { char: 'びゃ', phrase: 'びゃっこの、びゃ！' },
       { char: 'びゅ', phrase: 'びゅーんの、びゅ！' }, { char: 'びょ', phrase: 'びょういんの、びょ！' },
@@ -845,12 +862,21 @@
         ['わ', null,'を', null,'ん']
       ],
       dakuon: [
-        ['が','ぎ','ぐ','げ','ご'],
-        ['ざ','じ','ず','ぜ','ぞ'],
-        ['だ','ぢ','づ','で','ど'],
-        ['ば','び','ぶ','べ','ぼ'],
-        ['ぱ','ぴ','ぷ','ぺ','ぽ']
-      ],
+        ['get', 'gi', 'gu', 'ge', 'go'],
+        ['za', 'ji', 'zu', 'ze', 'zo'],
+        ['da', 'di', 'du', 'de', 'do'],
+        ['ba', 'bi', 'bu', 'be', 'bo'],
+        ['pa', 'pi', 'pu', 'pe', 'po']
+      ].map(row => row.map(id => {
+        const mappings = {
+          'get': 'が', 'gi': 'ぎ', 'gu': 'ぐ', 'ge': 'げ', 'go': 'ご',
+          'za': 'ざ', 'ji': 'じ', 'zu': 'ず', 'ze': 'ぜ', 'zo': 'ぞ',
+          'da': 'だ', 'di': 'ぢ', 'du': 'づ', 'de': 'で', 'do': 'ど',
+          'ba': 'ば', 'bi': 'び', 'bu': 'ぶ', 'be': 'べ', 'bo': 'ぼ',
+          'pa': 'ぱ', 'pi': 'ぴ', 'pu': 'ぷ', 'pe': 'ぺ', 'po': 'ぽ'
+        };
+        return mappings[id] || id;
+      })),
       youon: [
         ['きゃ','きゅ','きょ'],
         ['しゃ','しゅ','しょ'],
@@ -1180,8 +1206,9 @@
 
       // 画面遷移イベント
       document.getElementById('start-to-records-btn').addEventListener('click', showRecords);
+      document.getElementById('start-to-collection-btn').addEventListener('click', () => showCollection(false));
       document.getElementById('close-records-btn').addEventListener('click', hideRecords);
-      document.getElementById('res-to-collection-btn').addEventListener('click', showCollection);
+      document.getElementById('res-to-collection-btn').addEventListener('click', () => showCollection(true));
 
       // リセット（データ消去）イベント
       document.getElementById('reset-collection-btn').addEventListener('click', () => {
@@ -1193,7 +1220,7 @@
       document.getElementById('execute-reset-btn').addEventListener('click', async () => {
         document.getElementById('reset-confirm-modal').classList.add('hidden');
         await clearAllRecords();
-        showCollection(); 
+        renderCollectionGrid(); 
       });
     };
     
@@ -1250,17 +1277,68 @@
       });
     }
 
-    // ===== コレクション（図鑑）の描画 =====
-    async function showCollection() {
+    // ===== コレクション（図鑑）の状態管理と描画 =====
+    const collectionView = {
+      script: 'hiragana',
+      soundType: 'seion',
+      fromResult: false
+    };
+
+    function changeCollectionScript(script) {
+      collectionView.script = script;
+      updateCollectionTabs();
+      renderCollectionGrid();
+    }
+
+    function changeCollectionSound(soundType) {
+      collectionView.soundType = soundType;
+      updateCollectionTabs();
+      renderCollectionGrid();
+    }
+
+    function updateCollectionTabs() {
+      const activeClass = 'flex-1 text-xs md:text-sm font-bold py-1 px-3 rounded-md bg-white shadow-sm text-orange-500';
+      const inactiveClass = 'flex-1 text-xs md:text-sm font-bold py-1 px-3 rounded-md text-slate-500 hover:text-slate-700 transition-colors';
+      
+      document.getElementById('col-tab-hiragana').className = collectionView.script === 'hiragana' ? activeClass : inactiveClass;
+      document.getElementById('col-tab-katakana').className = collectionView.script === 'katakana' ? activeClass : inactiveClass;
+      
+      const activeSoundClass = 'flex-1 text-xs md:text-sm font-bold py-1 px-2 rounded-md bg-white shadow-sm text-orange-500';
+      const inactiveSoundClass = 'flex-1 text-xs md:text-sm font-bold py-1 px-2 rounded-md text-slate-500 hover:text-slate-700 transition-colors';
+      
+      ['seion', 'dakuon', 'youon'].forEach(type => {
+        document.getElementById(`col-tab-${type}`).className = collectionView.soundType === type ? activeSoundClass : inactiveSoundClass;
+      });
+    }
+
+    async function showCollection(fromResult = false) {
+      collectionView.fromResult = fromResult;
+      
+      startScreen.classList.add('hidden');
       resultScreen.classList.add('hidden');
       collectionScreen.classList.remove('hidden');
 
+      if (fromResult) {
+        document.getElementById('col-rematch-btn').classList.remove('hidden');
+        collectionView.script = config.script;
+        collectionView.soundType = config.soundType;
+      } else {
+        document.getElementById('col-rematch-btn').classList.add('hidden');
+        collectionView.script = 'hiragana';
+        collectionView.soundType = 'seion';
+      }
+
+      updateCollectionTabs();
+      await renderCollectionGrid();
+    }
+
+    async function renderCollectionGrid() {
       const container = document.getElementById('collection-grid');
       container.innerHTML = '<div class="text-white font-bold animate-pulse">よみこみ中...</div>';
 
       // IndexedDB から文字ごとの状態を取得
-      const stats = await getCardStats(config.script, config.soundType);
-      const layout = collectionLayouts[config.soundType] || collectionLayouts['seion'];
+      const stats = await getCardStats(collectionView.script, collectionView.soundType);
+      const layout = collectionLayouts[collectionView.soundType] || collectionLayouts['seion'];
 
       let html = '';
       let totalCards = 0;
@@ -1273,7 +1351,7 @@
             html += '<div class="w-12 h-16 md:w-16 md:h-20 flex-shrink-0"></div>'; // 余白
           } else {
             totalCards++;
-            let displayChar = config.script === 'katakana' ? toKatakana(char) : char;
+            let displayChar = collectionView.script === 'katakana' ? toKatakana(char) : char;
             const stat = stats.get(displayChar);
             let bgClass = "bg-slate-200/80 border-slate-300 shadow-inner"; // まだ（unplayed）
             let textClass = "text-slate-300/50"; // 文字をかなり薄くする
@@ -1305,10 +1383,13 @@
       const msgEl = document.getElementById('collection-complete-msg');
       if (totalCards > 0 && totalCards === perfectCards) {
         msgEl.classList.remove('hidden');
-        setTimeout(() => {
-          triggerMegaConfetti();
-          if (sound.ctx) sound.playComplete(); 
-        }, 300);
+        if (collectionView.fromResult) {
+          setTimeout(() => {
+            triggerMegaConfetti();
+            if (sound.ctx) sound.playComplete(); 
+          }, 300);
+          collectionView.fromResult = false; // 音と紙吹雪は1回だけ
+        }
       } else {
         msgEl.classList.add('hidden');
       }
