@@ -250,7 +250,7 @@
         </div>
 
         <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
-        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.2.2</p>
+        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.2.3</p>
 
         <!-- サマリーバッジ -->
         <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
@@ -601,7 +601,7 @@
 
   <script>
     // ============================================================
-    //   Ver 3.2.2 - 全機能統合＆ダブルタップズーム無効化
+    //   Ver 3.2.3 - おてつき中のCPU行動フリーズバグ修正
     // ============================================================
 
     // --- IndexedDB 安全保存機能 (コレクション対応 Ver 2) ---
@@ -1781,8 +1781,9 @@
       const actualDelay = (baseDelay + (Math.random() * variation - variation / 2)) * 1000 * speedMultiplier;
       const targetCardChar = state.currentCard.char;
 
+      // 修正: プレイヤーが入力ロック（おてつき気絶）中でもCPUはそのままカードを取れるように !state.isInputLocked を削除
       state.cpuActionTimeout = setTimeout(() => {
-        if (state.isPlaying && state.currentCard && state.currentCard.char === targetCardChar && !state.isInputLocked) {
+        if (state.isPlaying && state.currentCard && state.currentCard.char === targetCardChar) {
           cpuGetCard(state.currentCard);
         }
       }, actualDelay);
