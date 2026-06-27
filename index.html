@@ -17,6 +17,11 @@
     .font-klee {
       font-family: "Klee One", "UD Digi Kyokasho N-R", "BIZ UDGothic", sans-serif;
     }
+
+    /* ダブルタップズーム防止とタップ反応速度の向上 */
+    button, a {
+      touch-action: manipulation;
+    }
     
     .pop-bg {
       background-color: #1e293b;
@@ -245,7 +250,7 @@
         </div>
 
         <h2 class="text-xl md:text-2xl font-black text-orange-500 tracking-wider mb-1 font-ud-gothic">かるたの じゅんび</h2>
-        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.2.1</p>
+        <p class="text-xs text-slate-400 mb-3 font-bold">Ver 3.2</p>
 
         <!-- サマリーバッジ -->
         <div id="settings-summary" class="min-h-[28px] mb-3 flex flex-wrap justify-center gap-1"></div>
